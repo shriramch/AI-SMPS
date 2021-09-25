@@ -42,10 +42,10 @@ void cycle_crossover(vector<int> &p1, vector<int> &p2, vector<int> &c1, vector<i
   }
 }
 
-int main() {
-  vector<int> p1 = {0, 5, 2, 3, 1, 4, 6};
-  vector<int> p2 = {5, 1, 4, 6, 2, 0, 3};
-  vector<int> c1, c2;
-  cycle_crossover(p1, p2, c1, c2);
-  return 0;
-}
+// int main() {
+//  vector<int> p1 = {0, 5, 2, 3, 1, 4, 6};
+//  vector<int> p2 = {5, 1, 4, 6, 2, 0, 3};
+//  vector<int> c1, c2;
+//  cycle_crossover(p1, p2, c1, c2);
+//  return 0;
+//}
