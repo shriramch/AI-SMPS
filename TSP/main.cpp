@@ -1,12 +1,7 @@
-#include "Graph.h"
-#include <input.h>
+#include "GraphTSP.hpp"
 
 int main() {
   Graph G = input();
-
-  /*
-   * Code to be written here.
-   */
-
+  runGenetic(G);
   return 0;
 }

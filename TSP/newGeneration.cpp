@@ -14,10 +14,9 @@
  * Step 3. Mate pairs from the mating pool to generate a new 'generation' and return this
 */
 
-#include "Graph.hpp"
+#include "GraphTSP.hpp"
 
 bool debug = false; //set this to true if you want debug messages
-
 
 //--------------------------------------------------
 //OVERLOADED Prints. These should probably live in a different file.
@@ -57,7 +56,7 @@ void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut) {
     totalFitness += k;
   }
 
-  vector<double> prob; // probability that ith tour gets chosen
+  vector<double> probab; // probability that ith tour gets chosen
   for (auto f: fitness) {
     probab.push_back(f / totalFitness);
   }

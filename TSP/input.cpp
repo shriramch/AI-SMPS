@@ -1,4 +1,4 @@
-#include "Graph.h"
+#include "GraphTSP.hpp"
 
 Graph input() {
   int N;

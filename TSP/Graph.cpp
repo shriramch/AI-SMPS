@@ -1,4 +1,4 @@
-#include "Graph.h"
+#include "GraphTSP.hpp"
 
 Graph::Graph() {}
 
@@ -14,11 +14,11 @@ void Graph::addEdge(int u, int v, double w) {
   adj[u][v] = adj[v][u] = w;
 }
 
-int getN() {
-  return N;
+int Graph::getN() {
+  return (int)adj.size();
 }
 
-double tourCost(vector<int> &tour) {
+double Graph::tourCost(vector<int> &tour) {
   double cost = 0.0;
   for (int i = 1; i < (int) tour.size(); ++i) {
     cost += adj[tour[i]][tour[i - 1]];

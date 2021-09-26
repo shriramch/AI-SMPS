@@ -1,4 +1,4 @@
-#include "Graph.hpp"
+#include "GraphTSP.hpp"
 
 void cycle_crossover(vector<int> &p1, vector<int> &p2, vector<int> &c1, vector<int> &c2) {
   int n = (int) p1.size();

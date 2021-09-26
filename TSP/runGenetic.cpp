@@ -1,4 +1,4 @@
-#include "Graph.hpp"
+#include "GraphTSP.hpp"
 
 #define GEN_CNT 4
 
@@ -39,6 +39,7 @@ void runGenetic(Graph G) {
   while (true) {
     newGeneration(cycles, crossed);
     mix(cycles, crossed);
+    assert(cycles.size() == crossed.size())
     set < pair < double, pair < int, int >>, greater < pair < double, pair < int, int >> >> final;
     int N = (int) cycles.size();
     for (int i = 0; i < N; ++i) {

@@ -1,5 +1,5 @@
-#ifndef GRAPH_H
-#define GRAPH_H
+#ifndef GRAPHTSP_HPP
+#define GRAPHTSP_HPP
 
 #include <bits/stdc++.h>
 
@@ -11,15 +11,17 @@ class Graph {
  public:
   Graph();
   Graph(int);
-  void addNode(double, double)
-  void addEdge(double, double, double);
+  void addNode(double, double);
+  void addEdge(int, int, double);
   int getN();
   double tourCost(vector<int> &);
 };
 
+Graph input();
 void generate_cycles(int, int, vector<vector<int>> &);
 void cycle_crossover(vector<int> &, vector<int> &, vector<int> &, vector<int> &);
 void newGeneration(vector<vector<int>> &, vector<vector<int>> &);
 void mix(vector<vector<int>> &, vector<vector<int>> &);
+void
 
-#endif //GRAPH_H
+#endif //GRAPHTSP_HPP
