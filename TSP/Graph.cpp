@@ -13,3 +13,15 @@ void Graph::addNode(double u, double v) {
 void Graph::addEdge(int u, int v, double w) {
   adj[u][v] = adj[v][u] = w;
 }
+
+int getN() {
+  return N;
+}
+
+double tourCost(vector<int> &tour) {
+  double cost = 0.0;
+  for (int i = 1; i < (int) tour.size(); ++i) {
+    cost += adj[tour[i]][tour[i - 1]];
+  }
+  return cost + adj[tour[(int)tour.size()]][tour[0]];
+}
