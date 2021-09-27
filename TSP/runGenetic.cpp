@@ -2,7 +2,7 @@
 
 #define GEN_CNT 4
 
-void generate_cycles(int cnt, int N, vector<Vector<int>> &cycles) {
+void generate_cycles(int cnt, int N, vector<vector<int>> &cycles) {
   vector<int> temp(N);
   iota(temp.begin(), temp.end(), 0);
   cycles.clear();
@@ -35,12 +35,12 @@ void runGenetic(Graph G) {
     }
   }
   printTour(cycles[first]);
-  vector<vector<int>> crossed;
+  
   while (true) {
-    newGeneration(cycles, crossed);
-    mix(cycles, crossed);
-    assert(cycles.size() == crossed.size())
-    set < pair < double, pair < int, int >>, greater < pair < double, pair < int, int >> >> final;
+    vector<vector<int>> crossed(cycles);
+    newGeneration(cycles, crossed, G);
+    assert(cycles.size() == crossed.size());
+    set < pair < double, pair < int, int >>, greater < pair < double, pair < int, int > > > > final;
     int N = (int) cycles.size();
     for (int i = 0; i < N; ++i) {
       final.insert({G.tourCost(cycles[i]), {1, i}});
@@ -48,18 +48,18 @@ void runGenetic(Graph G) {
     for (int i = 0; i < N; ++i) {
       final.insert({G.tourCost(crossed[i]), {2, i}});
     }
-    if (*final.begin().second.first == 1) {
-      printTour(cycles[*final.begin().second.second]);
+    if ((*final.begin()).second.first == 1) {
+      printTour(cycles[(*final.begin()).second.second]);
     } else {
-      printTour(crossed[*final.begin().second.second]);
+      printTour(crossed[(*final.begin()).second.second]);
     }
     vector<vector<int>> new_cycles;
     while ((int) new_cycles.size() < n) {
       auto i = *final.begin();
-      if (*i.second.first == 1) {
-        new_cycles.push_back(cycles[*i.second.second]);
+      if (i.second.first == 1) {
+        new_cycles.push_back(cycles[i.second.second]);
       } else {
-        new_cycles.push_back(crossed[*i.second.second]);
+        new_cycles.push_back(crossed[i.second.second]);
       }
     }
     cycles = new_cycles;

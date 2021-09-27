@@ -44,14 +44,14 @@ void print(string k) {
 
 //--------------------------------------------------
 
-void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut) {
+void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut, Graph G) {
   int popSize = popIn.size(); // must be even
   srand(time(0));
 
   vector<double> fitness; // will contain fitness of ith tour
   double totalFitness = 0;
   for (auto v: popIn) {
-    double k = calcFitness(v);
+    double k = G.tourCost(v);
     fitness.push_back(k);
     totalFitness += k;
   }
@@ -65,7 +65,7 @@ void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut) {
   double rndNumber;
   double offset;
   print("probab is ");
-  print(probab);
+  //print(probab);
   for (int i = 0; i < popSize; i++) {
     rndNumber = rand() / (double) RAND_MAX;
     offset = 0.0;
@@ -76,10 +76,11 @@ void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut) {
         break;
       }
     }
-    print("mating pool is ");
-    print(matingPool);
+    //print("mating pool is ");
+    //print(matingPool);
+    print("reached point 1.5");
   }
-
+  print("reached point 2");
   for (int i = 0; i < popSize - 1; i += 2) {
     cycle_crossover(popIn[matingPool[i]], popIn[matingPool[i + 1]], popOut[i], popOut[i + 1]);
   }

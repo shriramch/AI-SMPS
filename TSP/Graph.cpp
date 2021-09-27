@@ -11,7 +11,7 @@ void Graph::addNode(double u, double v) {
 }
 
 void Graph::addEdge(int u, int v, double w) {
-  adj[u][v] = adj[v][u] = w;
+  adj[u][v] = w;
 }
 
 int Graph::getN() {
