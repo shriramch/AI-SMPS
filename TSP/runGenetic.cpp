@@ -19,9 +19,7 @@ void generate_cycles(int cnt, int N, vector<vector<int>> &cycles) {
   for (int i = 0; i < cnt; ++i) {
     cycles.push_back(temp);
     random_shuffle(cycles[i].begin(), cycles[i].end());
-    // printTour(cycles[i]);
   }
-  // cout<<"\n";
 }
 
 
@@ -43,75 +41,58 @@ void runGenetic(Graph G) {
     }
   }
   plot<<firstCost<<",";
-  // printTour(cycles[first]);
-  int r = 0;
-
-  
-  while (true && r<1000) {
-    r++;
-    // cout<<"generation "<<r<<endl;
-    // cout<<"the cycles of this generation are \n";
-    // for (auto c : cycles){
-    //   printTour(c);
-    // }
-    // cout<<"\noriginal costs = ";
-    // for (auto c : cycles){
-    //   cout<<G.tourCost(c)<<" ";
-    // }
-    vector<vector<int>> crossed(cycles);
-    newGeneration(cycles, crossed, G);
-    assert(cycles.size() == crossed.size());
-    set < pair < double, pair < int, int >>, less < pair < double, pair < int, int > > > > final;
-    int N = (int) cycles.size();
-    // cout<<"the cycles of cross are \n";
-    // for (auto c : crossed){
-    //   printTour(c);
-    // }
-    //---------------------------------------------------
-    // cout<<"\nCrossed costs = ";
-    // for (auto c : crossed){
-    //   cout<<G.tourCost(c)<<" ";
-    // }
-    // cout<<"\n";
-    //--------------------------------------------------
-    for (int i = 0; i < N; ++i) {
-      final.insert({G.tourCost(cycles[i]), {1, i}});
-    }
-    for (int i = 0; i < N; ++i) {
-      final.insert({G.tourCost(crossed[i]), {2, i}});
-    }
-    if ((*final.begin()).second.first == 1) {
-      printTour(cycles[(*final.begin()).second.second]);
-      float costi = G.tourCost(cycles[(*final.begin()).second.second]);
-      plot<<costi<<",";
-    } else {
-      printTour(crossed[(*final.begin()).second.second]);
-      float costi = G.tourCost(crossed[(*final.begin()).second.second]);
-      plot<<costi<<",";
-    }
-    vector<vector<int>> new_cycles;
-    auto fi = final.begin();
-    while ((int) new_cycles.size() < n) {
-      if ((*fi).second.first == 1) {
-        new_cycles.push_back(cycles[(*fi).second.second]);
-      } else {
-        new_cycles.push_back(crossed[(*fi).second.second]);
+  vector <int> bestTour;
+  float bestCost = numeric_limits<float>::infinity();
+  int p = 0;
+  while(p < 10){ //make this while true
+    p++;
+    int r = 0;
+    generate_cycles(GEN_CNT, n, cycles); 
+      while (true && r<1000) {
+      r++;
+      vector<vector<int>> crossed(cycles);
+      newGeneration(cycles, crossed, G);
+      assert(cycles.size() == crossed.size());
+      set < pair < double, pair < int, int >>, less < pair < double, pair < int, int > > > > final;
+      int N = (int) cycles.size();
+      for (int i = 0; i < N; ++i) {
+        final.insert({G.tourCost(cycles[i]), {1, i}});
       }
-      fi = next(fi);
-    }
-    // cout<<"the new ones are \n";
-    // for (auto n : new_cycles){
-    //   printTour(n);
-    // }
-    // cout<<"with costs \n";
-    // for (auto n : new_cycles){
-    //   cout<<G.tourCost(n)<<" ";
-    // }
-    // cout<<endl;
-   
-    cycles = new_cycles;
-    crossed.clear();
+      for (int i = 0; i < N; ++i) {
+        final.insert({G.tourCost(crossed[i]), {2, i}});
+      }
+      if ((*final.begin()).second.first == 1) {
+        float costi = G.tourCost(cycles[(*final.begin()).second.second]);
+        if(costi < bestCost){
+          bestCost = costi;
+          bestTour = cycles[(*final.begin()).second.second];
+        }
+        plot<<bestCost<<",";
+        printTour(bestTour);
+      } else {
+        float costi = G.tourCost(crossed[(*final.begin()).second.second]);
+        if(costi < bestCost){
+          bestCost = costi;
+          bestTour = crossed[(*final.begin()).second.second];
+        }
+        plot<<bestCost<<",";
+        printTour(bestTour);
+      }
+      vector<vector<int>> new_cycles;
+      auto fi = final.begin();
+      while ((int) new_cycles.size() < n) {
+        if ((*fi).second.first == 1) {
+          new_cycles.push_back(cycles[(*fi).second.second]);
+        } else {
+          new_cycles.push_back(crossed[(*fi).second.second]);
+        }
+        fi = next(fi);
+      }
+      cycles = new_cycles;
+      crossed.clear();
 
+    }
+ 
   }
   plot.close();
 }

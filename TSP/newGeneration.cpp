@@ -57,7 +57,6 @@ void mutate(vector <int> &pop){
     int i1 = uni(rng);
     int i2 = uni(rng);
     if(i1>i2) swap(i1, i2);
-    //cout<<"the indexes are "<<i1<<" "<<i2<<endl;
     reverse( pop.begin() + i1, pop.begin() + i2 );
     print("after mut ");
     print(pop);
@@ -66,8 +65,6 @@ void mutate(vector <int> &pop){
 
 void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut, Graph G) {
   int popSize = popIn.size(); // must be even
-  //srand(time(0));
-
   vector<double> fitness; // will contain fitness of ith tour
   double totalFitness = 0;
   for (auto v: popIn) {
@@ -116,18 +113,3 @@ void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut, Grap
     print(pop);
   }
 }
-
-// int main() {
-// vector<int> p1 = {0, 5, 2, 3, 1, 4, 6};
-// vector<int> p2 = {5, 1, 4, 6, 2, 0, 3};
-// vector<int> p3 = {0, 1, 2, 3, 4, 5, 6};
-// vector<int> p4 = {0, 2, 4, 6, 1, 3, 5};
-// vector<vector<int>> pop1 = {p1, p2, p3, p4};
-// vector<vector<int>> pop2 = {p1, p2, p3, p4};
-// newGeneration(pop1, pop2);
-// debug = true;
-// for (auto k: pop2) {
-// print(k);
-// }
-// return 0;
-// }
