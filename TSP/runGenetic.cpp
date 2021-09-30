@@ -1,6 +1,6 @@
 #include "GraphTSP.hpp"
 
-#define GEN_CNT 16
+#define GEN_CNT 100
 
 
 void printTour(vector<int> &tour) {
@@ -26,6 +26,8 @@ void generate_cycles(int cnt, int N, vector<vector<int>> &cycles) {
 
 
 void runGenetic(Graph G) {
+  ofstream plot;
+  plot.open ("plot.txt");
   int n = G.getN();
   srand(time(0));
   vector<vector<int>> cycles;
@@ -40,8 +42,11 @@ void runGenetic(Graph G) {
       firstCost = curCost;
     }
   }
+  plot<<firstCost<<",";
   // printTour(cycles[first]);
   int r = 0;
+
+  
   while (true && r<1000) {
     r++;
     // cout<<"generation "<<r<<endl;
@@ -77,8 +82,12 @@ void runGenetic(Graph G) {
     }
     if ((*final.begin()).second.first == 1) {
       printTour(cycles[(*final.begin()).second.second]);
+      float costi = G.tourCost(cycles[(*final.begin()).second.second]);
+      plot<<costi<<",";
     } else {
       printTour(crossed[(*final.begin()).second.second]);
+      float costi = G.tourCost(crossed[(*final.begin()).second.second]);
+      plot<<costi<<",";
     }
     vector<vector<int>> new_cycles;
     auto fi = final.begin();
@@ -99,8 +108,10 @@ void runGenetic(Graph G) {
     //   cout<<G.tourCost(n)<<" ";
     // }
     // cout<<endl;
+   
     cycles = new_cycles;
     crossed.clear();
 
   }
+  plot.close();
 }
