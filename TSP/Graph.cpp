@@ -23,5 +23,5 @@ double Graph::tourCost(vector<int> &tour) {
   for (int i = 1; i < (int) tour.size(); ++i) {
     cost += adj[tour[i]][tour[i - 1]];
   }
-  return cost + adj[tour[(int)tour.size()]][tour[0]];
+  return cost + adj[tour[(int)tour.size()-1]][tour[0]];
 }

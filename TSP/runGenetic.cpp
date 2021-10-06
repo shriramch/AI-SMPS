@@ -1,6 +1,15 @@
 #include "GraphTSP.hpp"
 
-#define GEN_CNT 4
+#define GEN_CNT 100
+#define TIMEOUT 10
+
+void printTour(vector<int> &tour) {
+  int N = (int) tour.size();
+  for (int i = 0; i < N; ++i) {
+    cout << tour[i] << " ";
+  }
+  cout << endl;
+}
 
 void generate_cycles(int cnt, int N, vector<vector<int>> &cycles) {
   vector<int> temp(N);
@@ -12,16 +21,12 @@ void generate_cycles(int cnt, int N, vector<vector<int>> &cycles) {
   }
 }
 
-void printTour(vector<int> &tour) {
-  int N = (int) tour.size();
-  for (int i = 0; i < N; ++i) {
-    cout << tour[i] << " ";
-  }
-  cout << endl;
-}
 
 void runGenetic(Graph G) {
+  ofstream plot;
+  plot.open ("plot.txt");
   int n = G.getN();
+  srand(time(0));
   vector<vector<int>> cycles;
   generate_cycles(GEN_CNT, n, cycles);
   cycles[0] = G.greedyTSP();
@@ -35,35 +40,59 @@ void runGenetic(Graph G) {
       firstCost = curCost;
     }
   }
-  printTour(cycles[first]);
+  plot<<firstCost<<",";
+  vector <int> bestTour;
+  float bestCost = numeric_limits<float>::infinity();
+  auto start = std::chrono::steady_clock::now();
+  while(true){ //make this while true
+      generate_cycles(GEN_CNT, n, cycles); 
+      int r = 0;
+      while (r < 1000) {
+          r++;
+          vector<vector<int>> crossed(cycles);
+          newGeneration(cycles, crossed, G);
+          assert(cycles.size() == crossed.size());
+          set < pair < double, pair < int, int >>, less < pair < double, pair < int, int > > > > final;
+          int N = (int) cycles.size();
+          for (int i = 0; i < N; ++i) {
+            final.insert({G.tourCost(cycles[i]), {1, i}});
+          }
+          for (int i = 0; i < N; ++i) {
+            final.insert({G.tourCost(crossed[i]), {2, i}});
+          }
+          if ((*final.begin()).second.first == 1) {
+            float costi = G.tourCost(cycles[(*final.begin()).second.second]);
+            if(costi < bestCost){
+              bestCost = costi;
+              bestTour = cycles[(*final.begin()).second.second];
+            }
+            plot<<bestCost<<",";
+            printTour(bestTour);
+          } else {
+            float costi = G.tourCost(crossed[(*final.begin()).second.second]);
+            if(costi < bestCost){
+              bestCost = costi;
+              bestTour = crossed[(*final.begin()).second.second];
+            }
+            plot<<bestCost<<",";
+            printTour(bestTour);
+          }
+          vector<vector<int>> new_cycles;
+          auto fi = final.begin();
+          while ((int) new_cycles.size() < n) {
+            if ((*fi).second.first == 1) {
+              new_cycles.push_back(cycles[(*fi).second.second]);
+            } else {
+              new_cycles.push_back(crossed[(*fi).second.second]);
+            }
+            fi = next(fi);
+          }
+          cycles = new_cycles;
+          crossed.clear();
+          //if(std::chrono::steady_clock::now() - start > std::chrono::seconds{1}) break;
+    }
   
-  while (true) {
-    vector<vector<int>> crossed(cycles);
-    newGeneration(cycles, crossed, G);
-    assert(cycles.size() == crossed.size());
-    set < pair < double, pair < int, int >>, greater < pair < double, pair < int, int > > > > final;
-    int N = (int) cycles.size();
-    for (int i = 0; i < N; ++i) {
-      final.insert({G.tourCost(cycles[i]), {1, i}});
-    }
-    for (int i = 0; i < N; ++i) {
-      final.insert({G.tourCost(crossed[i]), {2, i}});
-    }
-    if ((*final.begin()).second.first == 1) {
-      printTour(cycles[(*final.begin()).second.second]);
-    } else {
-      printTour(crossed[(*final.begin()).second.second]);
-    }
-    vector<vector<int>> new_cycles;
-    while ((int) new_cycles.size() < n) {
-      auto i = *final.begin();
-      if (i.second.first == 1) {
-        new_cycles.push_back(cycles[i.second.second]);
-      } else {
-        new_cycles.push_back(crossed[i.second.second]);
-      }
-    }
-    cycles = new_cycles;
-    crossed.clear();
+  if(std::chrono::steady_clock::now() - start > std::chrono::seconds{TIMEOUT}) break;
   }
+  plot.close();
 }

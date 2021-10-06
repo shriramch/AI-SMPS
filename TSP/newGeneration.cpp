@@ -17,7 +17,10 @@
 #include "GraphTSP.hpp"
 
 bool debug = false; //set this to true if you want debug messages
+std::random_device rd;     // only used once to initialise (seed) engine
+std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
 
+std::uniform_real_distribution<float> uniReal(0.0,1.0);
 //--------------------------------------------------
 //OVERLOADED Prints. These should probably live in a different file.
 
@@ -44,16 +47,30 @@ void print(string k) {
 
 //--------------------------------------------------
 
+void mutate(vector <int> &pop){
+  std::uniform_int_distribution<int> uni(0,pop.size()-2); // guaranteed unbiased
+  double rndNumber = uniReal(rng);
+  if(rndNumber < 0.4){
+    print("mutating");
+    print("initial ");
+    print(pop);
+    int i1 = uni(rng);
+    int i2 = uni(rng);
+    if(i1>i2) swap(i1, i2);
+    reverse( pop.begin() + i1, pop.begin() + i2 );
+    print("after mut ");
+    print(pop);
+  }
+}
+
 void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut, Graph G) {
   int popSize = popIn.size(); // must be even
-  srand(time(0));
-
   vector<double> fitness; // will contain fitness of ith tour
   double totalFitness = 0;
   for (auto v: popIn) {
     double k = G.tourCost(v);
-    fitness.push_back(k);
-    totalFitness += k;
+    fitness.push_back(1/k);
+    totalFitness += (1/k);
   }
 
   vector<double> probab; // probability that ith tour gets chosen
@@ -65,9 +82,11 @@ void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut, Grap
   double rndNumber;
   double offset;
   print("probab is ");
-  //print(probab);
+  print(probab);
+  print("fitness is ");
+  print(fitness);
   for (int i = 0; i < popSize; i++) {
-    rndNumber = rand() / (double) RAND_MAX;
+    rndNumber = uniReal(rng);
     offset = 0.0;
     for (int j = 0; j < popSize; j++) {
       offset += probab[j];
@@ -76,27 +95,21 @@ void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut, Grap
         break;
       }
     }
-    //print("mating pool is ");
-    //print(matingPool);
-    print("reached point 1.5");
   }
-  print("reached point 2");
+  print("mating pool is ");
+  print(matingPool);
   for (int i = 0; i < popSize - 1; i += 2) {
     cycle_crossover(popIn[matingPool[i]], popIn[matingPool[i + 1]], popOut[i], popOut[i + 1]);
   }
+  print("popOut pre mutation");
+  for (auto pop : popOut){
+    print(pop);
+  }
+  for(int i = 0; i < popSize - 1; i++){
+    mutate(popOut[i]);
+  }
+  print("popout post mutation");
+  for (auto pop : popOut){
+    print(pop);
+  }
 }
-
-// int main() {
-// vector<int> p1 = {0, 5, 2, 3, 1, 4, 6};
-// vector<int> p2 = {5, 1, 4, 6, 2, 0, 3};
-// vector<int> p3 = {0, 1, 2, 3, 4, 5, 6};
-// vector<int> p4 = {0, 2, 4, 6, 1, 3, 5};
-// vector<vector<int>> pop1 = {p1, p2, p3, p4};
-// vector<vector<int>> pop2 = {p1, p2, p3, p4};
-// newGeneration(pop1, pop2);
-// debug = true;
-// for (auto k: pop2) {
-// print(k);
-// }
-// return 0;
-// }
