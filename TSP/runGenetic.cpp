@@ -6,7 +6,7 @@ void generate_cycles(int cnt, int N, vector<vector<int>> &cycles) {
   vector<int> temp(N);
   iota(temp.begin(), temp.end(), 0);
   cycles.clear();
-  for (int i = 0; i < cnt; ++i) {
+  for (int i = 1; i < cnt; ++i) {
     cycles.push_back(temp);
     random_shuffle(cycles[i].begin(), cycles[i].end());
   }
@@ -24,6 +24,7 @@ void runGenetic(Graph G) {
   int n = G.getN();
   vector<vector<int>> cycles;
   generate_cycles(GEN_CNT, n, cycles);
+  cycles[0] = G.greedyTSP();
   assert(!((int) cycles.size() & 1));
   int first = -1;
   double firstCost = DBL_MAX;
