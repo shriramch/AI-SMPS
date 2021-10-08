@@ -1,7 +1,7 @@
 #include "GraphTSP.hpp"
 
-#define GEN_CNT 100
-#define TIMEOUT 10
+#define GEN_CNT 5000
+#define TIMEOUT 300
 
 void printTour(vector<int> &tour) {
   int N = (int) tour.size();
@@ -46,7 +46,7 @@ void runGenetic(Graph G) {
   while(true){ //make this while true
       generate_cycles(GEN_CNT, n, cycles); 
       int r = 0;
-      while (r < 1000) {
+      while (r < 10000) {
           r++;
           vector<vector<int>> crossed(cycles);
           newGeneration(cycles, crossed, G);
