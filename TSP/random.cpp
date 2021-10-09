@@ -19,3 +19,7 @@ void Graph::random() {
     if (std::chrono::steady_clock::now() - start > std::chrono::seconds{TIMEOUT}) break;
   }
 }
+
+void random(Graph G) {
+  G.random();
+}
