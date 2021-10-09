@@ -40,7 +40,7 @@ void runGenetic(Graph G) {
   srand(time(0));
   vector<vector<int>> cycles;
   generate_cycles(GEN_CNT, n, cycles);
-  cycles[0] = G.greedyTSP();
+  //cycles[0] = G.greedyTSP();
   assert(!((int) cycles.size() & 1));
   int first = -1;
   double firstCost = DBL_MAX;
@@ -70,32 +70,34 @@ void runGenetic(Graph G) {
       vector<vector<int>> crossed(cycles);
       newGeneration(cycles, crossed, G);
       assert(cycles.size() == crossed.size());
-      set <pair <double, pair<int, int>>> final_c;
+      vector < pair < double, pair < int, int >>> final_c;
       int N = (int) cycles.size();
       for (int i = 0; i < N; ++i) {
-        final_c.insert({G.tourCost(cycles[i]), {1, i}});
+        final_c.push_back({G.tourCost(cycles[i]), {1, i}});
       }
       for (int i = 0; i < N; ++i) {
-        final_c.insert({G.tourCost(crossed[i]), {2, i}});
+        final_c.push_back({G.tourCost(crossed[i]), {2, i}});
       }
-      if ((*final_c.begin()).second.first == 1) {
-        float costi = G.tourCost(cycles[(*final_c.begin()).second.second]);
+      if (final_c[0].second.first == 1) {
+        float costi = G.tourCost(cycles[final_c[0].second.second]);
         if (costi < bestCost) {
           bestCost = costi;
-          bestTour = cycles[(*final_c.begin()).second.second];
+          bestTour = cycles[final_c[0].second.second];
         }
         plot << bestCost << ",";
         printTour(bestTour);
       } else {
-        float costi = G.tourCost(crossed[(*final_c.begin()).second.second]);
+        float costi = G.tourCost(crossed[final_c[0].second.second]);
         if (costi < bestCost) {
           bestCost = costi;
-          bestTour = crossed[(*final_c.begin()).second.second];
+          bestTour = crossed[final_c[0].second.second];
         }
         plot << bestCost << ",";
         printTour(bestTour);
       }
       vector<vector<int>> new_cycles;
+      sort(final_c.begin(), final_c.end());
+      reverse(final_c.begin(), final_c.end());
       auto fi = final_c.begin();
       while ((int) new_cycles.size() < n) {
         if ((*fi).second.first == 1) {
