@@ -3,7 +3,7 @@
 Graph input() {
   int N;
   string type;
-  getline (std::cin,type);
+  getline(std::cin, type);
   cin >> N;
   Graph G(N);
   for (int i = 0; i < N; ++i) {

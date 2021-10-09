@@ -9,8 +9,8 @@ CFLAGS = -std=c++11 -g
 # ****************************************************
 # Targets needed to bring the executable up to date
  
-main: main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o GraphTSP.hpp
-	$(CC) $(CFLAGS) -o main main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o
+main: main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o random.o GraphTSP.hpp
+	$(CC) $(CFLAGS) -o main main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o random.o
  
 # The main.o target can be written more simply
 
@@ -31,6 +31,9 @@ runGenetic.o: runGenetic.cpp GraphTSP.hpp
 
 Graph.o: Graph.cpp GraphTSP.hpp
 	$(CC) $(CFLAGS) -c Graph.cpp 
+
+Random.o: random.cpp GraphTSP.hpp
+	$(CC) $(CFLAGS) -c random.cpp
 
 clean:
 	rm *o main
