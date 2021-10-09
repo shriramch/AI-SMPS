@@ -8,8 +8,8 @@ std::mt19937 rng1(rd1());    // random-number engine used (Mersenne-Twister in t
 std::uniform_real_distribution<float> uniReal2(0.0,1.0);
 
 
-bool randify = false;
-bool debug1 = false;
+bool grandify = true;
+bool debug1 = true;
 bool printcost = true;
 
 void printTour(vector<int> &tour) {
@@ -30,26 +30,25 @@ void generate_cycles(int cnt, int N, vector<vector<int>> &cycles, Graph G, bool 
       cycles.push_back(temp);
       random_shuffle(cycles[i].begin(), cycles[i].end());
     }
-  
-  std::uniform_int_distribution<int> uni2(0,cycles[0].size()-2); // guaranteed unbiased
-  double t = 15/(double)cnt;
-  t*=1000;
-  int k = t;
-  //cout<<"time = "<<k<<endl;
-    for(int i = 0; i<cycles.size(); i++){
-      auto start = std::chrono::steady_clock::now();
-      while(std::chrono::steady_clock::now() - start < std::chrono::milliseconds{k}){
-        int i1 = uni2(rng1);
-        int i2 = uni2(rng1);
-        //double mut = uniReal2(rng1);
-        if(i1 > i2) swap(i1, i2);
-        auto oldCycle = cycles[i];
-        reverse(cycles[i].begin() + i1, cycles[i].begin() + i2);
-        if(G.tourCost(cycles[i])>=G.tourCost(oldCycle)){
-            cycles[i] = oldCycle;
+    if(grandify){
+      std::uniform_int_distribution<int> uni2(0,cycles[0].size()-2); // guaranteed unbiased
+      double t = 15/(double)cnt;
+      t*=1000;
+      int k = t;
+      for(int i = 0; i<cycles.size(); i++){
+        auto start = std::chrono::steady_clock::now();
+        while(std::chrono::steady_clock::now() - start < std::chrono::milliseconds{k}){
+          int i1 = uni2(rng1);
+          int i2 = uni2(rng1);
+          //double mut = uniReal2(rng1);
+          if(i1 > i2) swap(i1, i2);
+          auto oldCycle = cycles[i];
+          reverse(cycles[i].begin() + i1, cycles[i].begin() + i2);
+          if(G.tourCost(cycles[i])>=G.tourCost(oldCycle)){
+              cycles[i] = oldCycle;
+          }
         }
       }
-      if(debug1)cout<<"done!"<<endl;
     }
   }
   else{
@@ -72,24 +71,29 @@ void runGenetic(Graph G) {
   srand(time(0));
   vector<vector<int>> cycles;
   generate_cycles(GEN_CNT, n, cycles, G, false);
-  if(randify){
+  printTour(cycles[0]);
+  if(printcost) cout<<"cost = "<<G.tourCost(cycles[0])<<endl;
+  if(grandify){
     std::uniform_int_distribution<int> uni2(0,cycles[0].size()-2); // guaranteed unbiased
     int k = 0;
+    int tot = 0;
     while(1){
-      k++;
+      tot++;
       int i1 = uni2(rng1);
       int i2 = uni2(rng1);
       if(i1 > i2) swap(i1, i2);
-      auto oldCycle = cycles[0];
+      vector<int>oldCycle(cycles[0]);
       reverse(cycles[0].begin() + i1, cycles[0].begin() + i2);
       if(G.tourCost(cycles[0])>=G.tourCost(oldCycle)){
           cycles[0] = oldCycle;
       }
       else{
         printTour(cycles[0]);
-        if(debug1) cout<<"\ncost is = "<<G.tourCost(cycles[0])<<" "<<k<<endl;
+        if(debug1) cout<<"\ncost is = "<<G.tourCost(cycles[0])<<" "<<tot<<endl;
         plot<<G.tourCost(cycles[0])<<",";
+        k = tot;
       }
+      if(tot - k > 1000000) break;
     }
   }
   assert(!((int) cycles.size() & 1));
@@ -135,6 +139,7 @@ void runGenetic(Graph G) {
               bestCost = costi;
               bestTour = cycles[(*final.begin()).second.second];
               printTour(bestTour);
+              if(printcost) cout<<"cost = "<<bestCost<<endl;
               bestRound = r;
             }
             plot<<bestCost<<",";
@@ -146,6 +151,8 @@ void runGenetic(Graph G) {
               bestTour = crossed[(*final.begin()).second.second];
               printTour(bestTour);
               bestRound = r;
+              if(printcost) cout<<"cost = "<<bestCost<<endl;
+
             }
             plot<<bestCost<<",";
           }
