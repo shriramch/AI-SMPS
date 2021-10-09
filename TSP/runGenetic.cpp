@@ -110,74 +110,16 @@ void runGenetic(Graph G) {
   int g = 0;
   int bestRound = -1;
   while(true){ //make this while true
-      if(debug1) {
-        cout<<"round = "<<g<<" best round = "<<bestRound<<endl;
-        cout<<"health check:";
-        set <vector <int> > s;
-        double cos = 0;
-        double maxcost = -1;
-        double mincost = 100000000000000;
-        for(auto c : cycles){
-          s.insert(c);
-          maxcost = max(maxcost, G.tourCost(c));
-          mincost = min(mincost,G.tourCost(c));
-          cos+=G.tourCost(c);
-        }
-        cout<<s.size()<<"/"<<cycles.size()<<endl;
-        cout<<"Average cost = "<<cos/cycles.size()<<endl;
-        cout<<"Min cost = "<<mincost<<endl;
-        cout<<"Max cost = "<<maxcost<<endl;
-        //exit(0);
-      }
       if(g>1) generate_cycles(GEN_CNT, n, cycles, G, (g - bestRound > 5000) && g > 2*bestRound);
-      if(debug1){
-        cout<<"after gencycles:";
-        cout<<"health check:";
-        set <vector <int> > s;
-        double cos = 0;
-        double maxcost = -1;
-        double mincost = 100000000000000;
-        for(auto c : cycles){
-          s.insert(c);
-          maxcost = max(maxcost, G.tourCost(c));
-          mincost = min(mincost,G.tourCost(c));
-          cos+=G.tourCost(c);
-        }
-        cout<<s.size()<<"/"<<cycles.size()<<endl;
-        cout<<"Average cost = "<<cos/cycles.size()<<endl;
-        cout<<"Min cost = "<<mincost<<endl;
-        cout<<"Max cost = "<<maxcost<<endl;
-        //exit(0);
-      }
       if(g-bestRound>5000 && g > 2*bestRound) {
         bestRound = g;
       } 
-      //cout<<"size of new cycles = "<<cycles.size()<<endl;
       r = bestRound;
       while (1) {
           r++;
           g++;
           vector<vector<int>> crossed(cycles);
           newGeneration(cycles, crossed, G);
-          //cout<<"size of cycles = "<<cycles.size()<<endl;
-          // if(debug1){
-          //   cout<<"after crossover:";
-          //   cout<<"health check:";
-          //   set <vector <int> > s;
-          //   double cos = 0;
-          //   double maxcost = -1;
-          //   double mincost = 100000000000000;
-          //   for(auto c : crossed){
-          //     s.insert(c);
-          //     maxcost = max(maxcost, G.tourCost(c));
-          //     mincost = min(mincost,G.tourCost(c));
-          //     cos+=G.tourCost(c);
-          //   }
-          //   cout<<s.size()<<"/"<<crossed.size()<<endl;
-          //   cout<<"Average cost = "<<cos/crossed.size()<<endl;
-          //   cout<<"Min cost = "<<mincost<<endl;
-          //   cout<<"Max cost = "<<maxcost<<endl;
-          // }
           assert(cycles.size() == crossed.size());
           set < pair < double, pair < int, int >>, less < pair < double, pair < int, int > > > > final;
           int N = (int) cycles.size();
@@ -193,7 +135,6 @@ void runGenetic(Graph G) {
               bestCost = costi;
               bestTour = cycles[(*final.begin()).second.second];
               printTour(bestTour);
-              if(printcost) cout<<"\nCost = "<<bestCost<<" "<<g<<endl;
               bestRound = r;
             }
             plot<<bestCost<<",";
@@ -204,7 +145,6 @@ void runGenetic(Graph G) {
               bestCost = costi;
               bestTour = crossed[(*final.begin()).second.second];
               printTour(bestTour);
-              if(printcost) cout<<"\nCost = "<<bestCost<<" "<<g<<endl;
               bestRound = r;
             }
             plot<<bestCost<<",";
@@ -224,7 +164,6 @@ void runGenetic(Graph G) {
           if(r - bestRound > 200){
             break;
           }
-          //if(std::chrono::steady_clock::now() - start > std::chrono::seconds{1}) break;
     }
   
   if(std::chrono::steady_clock::now() - start > std::chrono::seconds{TIMEOUT}) break;
