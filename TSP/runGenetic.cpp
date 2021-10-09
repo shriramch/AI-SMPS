@@ -27,7 +27,8 @@ void combine_cycles(int cnt,
                     vector<vector<int>> &cycles,
                     set<pair<double, vector < int >>, greater<pair<double, vector < int>> > > &top_random) {
   generate_cycles(cnt, N, cycles);
-  for (int i = 0, auto j = top_random.begin(); i < (int)cycles.size() && j != top_random.end(); ++i, ++j) {
+  int i = 0;
+  for (auto j = top_random.begin(); i < (int)cycles.size() && j != top_random.end(); ++i, ++j) {
     cycles[i] = (*j).second;
   }
 }
@@ -59,7 +60,7 @@ void runGenetic(Graph G) {
     if (set == 0) {
       generate_cycles(GEN_CNT, n, cycles);
     } else {
-      set<pair<double, vector < int >>, greater<pair<double, vector < int>> > > top_random = G.best_tours;
+      auto top_random = G.best_tours;
       combine_cycles(GEN_CNT, n, cycles, top_random);
     }
     ++set;
@@ -69,33 +70,33 @@ void runGenetic(Graph G) {
       vector<vector<int>> crossed(cycles);
       newGeneration(cycles, crossed, G);
       assert(cycles.size() == crossed.size());
-      set < pair < double, pair < int, int >>, less < pair < double, pair < int, int > > > > final;
+      set <pair <double, pair<int, int>>> final_c;
       int N = (int) cycles.size();
       for (int i = 0; i < N; ++i) {
-        final.insert({G.tourCost(cycles[i]), {1, i}});
+        final_c.insert({G.tourCost(cycles[i]), {1, i}});
       }
       for (int i = 0; i < N; ++i) {
-        final.insert({G.tourCost(crossed[i]), {2, i}});
+        final_c.insert({G.tourCost(crossed[i]), {2, i}});
       }
-      if ((*final.begin()).second.first == 1) {
-        float costi = G.tourCost(cycles[(*final.begin()).second.second]);
+      if ((*final_c.begin()).second.first == 1) {
+        float costi = G.tourCost(cycles[(*final_c.begin()).second.second]);
         if (costi < bestCost) {
           bestCost = costi;
-          bestTour = cycles[(*final.begin()).second.second];
+          bestTour = cycles[(*final_c.begin()).second.second];
         }
         plot << bestCost << ",";
         printTour(bestTour);
       } else {
-        float costi = G.tourCost(crossed[(*final.begin()).second.second]);
+        float costi = G.tourCost(crossed[(*final_c.begin()).second.second]);
         if (costi < bestCost) {
           bestCost = costi;
-          bestTour = crossed[(*final.begin()).second.second];
+          bestTour = crossed[(*final_c.begin()).second.second];
         }
         plot << bestCost << ",";
         printTour(bestTour);
       }
       vector<vector<int>> new_cycles;
-      auto fi = final.begin();
+      auto fi = final_c.begin();
       while ((int) new_cycles.size() < n) {
         if ((*fi).second.first == 1) {
           new_cycles.push_back(cycles[(*fi).second.second]);
