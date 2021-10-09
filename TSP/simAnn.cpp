@@ -65,14 +65,15 @@ public:
     randum_number=(double) (rand()/ (double) RAND_MAX);
 
     prob=1/(1+ pow(M_E, (gain/temparature)));
-    if(prob > 	randum_number)
+    if(prob > randum_number)
      for(int i=1;i<n;i++)    
     curr_path[i]=new_path[i];
-   
+    //cout<<getCost(new_path)<<endl;
     if(getCost(new_path) < getCost(min_path) )
     {
      for(int i=1;i<n;i++)    
       min_path[i]=new_path[i];
+      cout<<"temp = "<<temparature<<endl;
      retraceMinPath();
     }
    }

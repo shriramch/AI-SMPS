@@ -1,13 +1,15 @@
 #include "GraphTSP.hpp"
 
-#define GEN_CNT 200
+#define GEN_CNT 100
 #define TIMEOUT 300
 
 std::random_device rd1;     // only used once to initialise (seed) engine
 std::mt19937 rng1(rd1());    // random-number engine used (Mersenne-Twister in this case)
+std::uniform_real_distribution<float> uniReal2(0.0,1.0);
 
-bool randify = true;
-bool debug1 = true;
+
+bool randify = false;
+bool debug1 = false;
 bool printcost = true;
 
 void printTour(vector<int> &tour) {
@@ -28,23 +30,38 @@ void generate_cycles(int cnt, int N, vector<vector<int>> &cycles, Graph G, bool 
       cycles.push_back(temp);
       random_shuffle(cycles[i].begin(), cycles[i].end());
     }
-  }
   
-  std::uniform_int_distribution<int> uni1(0,cycles[0].size()-2); // guaranteed unbiased
-  for(auto cycle : cycles){
-    int i = 100;
-    while(--i){
-    int i1 = uni1(rng1);
-    int i2 = uni1(rng1);
-    if(i1 > i2) swap(i1, i2);
-    auto oldCycle = cycle;
-    reverse(cycle.begin() + i1, cycle.begin() + i2);
-      if(G.tourCost(cycle)>G.tourCost(oldCycle)){
-        cycle = oldCycle;
+  std::uniform_int_distribution<int> uni2(0,cycles[0].size()-2); // guaranteed unbiased
+  double t = 15/(double)cnt;
+  t*=1000;
+  int k = t;
+  //cout<<"time = "<<k<<endl;
+    for(int i = 0; i<cycles.size(); i++){
+      auto start = std::chrono::steady_clock::now();
+      while(std::chrono::steady_clock::now() - start < std::chrono::milliseconds{k}){
+        int i1 = uni2(rng1);
+        int i2 = uni2(rng1);
+        //double mut = uniReal2(rng1);
+        if(i1 > i2) swap(i1, i2);
+        auto oldCycle = cycles[i];
+        reverse(cycles[i].begin() + i1, cycles[i].begin() + i2);
+        if(G.tourCost(cycles[i])>=G.tourCost(oldCycle)){
+            cycles[i] = oldCycle;
+        }
       }
+      if(debug1)cout<<"done!"<<endl;
     }
   }
-  
+  else{
+    std::uniform_int_distribution<int> uni1(0,cycles[0].size()-2); // guaranteed unbiased
+    for(int i = 0; i<cycles.size(); i++){
+      int i1 = uni1(rng1);
+      int i2 = uni1(rng1);
+      if(i1 > i2) swap(i1, i2);
+      auto oldCycle = cycles[i];
+      reverse(cycles[i].begin() + i1, cycles[i].begin() + i2);
+    }
+  }
 }
 
 
@@ -54,7 +71,7 @@ void runGenetic(Graph G) {
   int n = G.getN();
   srand(time(0));
   vector<vector<int>> cycles;
-  generate_cycles(GEN_CNT, n, cycles, G);
+  generate_cycles(GEN_CNT, n, cycles, G, false);
   if(randify){
     std::uniform_int_distribution<int> uni2(0,cycles[0].size()-2); // guaranteed unbiased
     int k = 0;
@@ -110,8 +127,9 @@ void runGenetic(Graph G) {
         cout<<"Average cost = "<<cos/cycles.size()<<endl;
         cout<<"Min cost = "<<mincost<<endl;
         cout<<"Max cost = "<<maxcost<<endl;
+        //exit(0);
       }
-      generate_cycles(GEN_CNT, n, cycles, G, (g - bestRound > 5000) && g > 2*bestRound);
+      if(g>1) generate_cycles(GEN_CNT, n, cycles, G, (g - bestRound > 5000) && g > 2*bestRound);
       if(debug1){
         cout<<"after gencycles:";
         cout<<"health check:";
@@ -142,24 +160,24 @@ void runGenetic(Graph G) {
           vector<vector<int>> crossed(cycles);
           newGeneration(cycles, crossed, G);
           //cout<<"size of cycles = "<<cycles.size()<<endl;
-          if(debug1){
-            cout<<"after one crossover:";
-            cout<<"health check:";
-            set <vector <int> > s;
-            double cos = 0;
-            double maxcost = -1;
-            double mincost = 100000000000000;
-            for(auto c : crossed){
-              s.insert(c);
-              maxcost = max(maxcost, G.tourCost(c));
-              mincost = min(mincost,G.tourCost(c));
-              cos+=G.tourCost(c);
-            }
-            cout<<s.size()<<"/"<<crossed.size()<<endl;
-            cout<<"Average cost = "<<cos/crossed.size()<<endl;
-            cout<<"Min cost = "<<mincost<<endl;
-            cout<<"Max cost = "<<maxcost<<endl;
-          }
+          // if(debug1){
+          //   cout<<"after crossover:";
+          //   cout<<"health check:";
+          //   set <vector <int> > s;
+          //   double cos = 0;
+          //   double maxcost = -1;
+          //   double mincost = 100000000000000;
+          //   for(auto c : crossed){
+          //     s.insert(c);
+          //     maxcost = max(maxcost, G.tourCost(c));
+          //     mincost = min(mincost,G.tourCost(c));
+          //     cos+=G.tourCost(c);
+          //   }
+          //   cout<<s.size()<<"/"<<crossed.size()<<endl;
+          //   cout<<"Average cost = "<<cos/crossed.size()<<endl;
+          //   cout<<"Min cost = "<<mincost<<endl;
+          //   cout<<"Max cost = "<<maxcost<<endl;
+          // }
           assert(cycles.size() == crossed.size());
           set < pair < double, pair < int, int >>, less < pair < double, pair < int, int > > > > final;
           int N = (int) cycles.size();
