@@ -50,7 +50,7 @@ void print(string k) {
 void mutate(vector <int> &pop){
   std::uniform_int_distribution<int> uni(0,pop.size()-2); // guaranteed unbiased
   double rndNumber = uniReal(rng);
-  if(rndNumber < 0.5){
+  if(rndNumber < 0.3){
     print("mutating");
     print("initial ");
     print(pop);
