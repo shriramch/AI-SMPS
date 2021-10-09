@@ -1,10 +1,14 @@
 #include "GraphTSP.hpp"
 #include <thread>
 
+void random(Graph G) {
+  G.random();
+}
+
 int main() {
   Graph G = input();
   thread genetic_thread(runGenetic, G);
-  thread random_thread(G.random());
+  thread random_thread(random, G);
   genetic_thread.join();
   random_thread.join();
   return 0;
