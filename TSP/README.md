@@ -5,7 +5,7 @@ This directory contains solutions to Assignment 1 of the AI-SMPS (CS6380) Jul-No
 ## To run the code.
 ```
 make
-./main < inputFile > outputFile
+./TSP < inputFile > outputFile
 ```
 Note that this will take 310 seconds to complete execution. To change this, set the ```TIMEOUT``` variable in runGenetic.cpp
 

@@ -37,7 +37,6 @@ void combine_cycles(int cnt,
 }
 
 void runGenetic(Graph G) {
-  cout << "genetic thread" << endl;
   ofstream plot;
   plot.open("plot.txt");
   int n = G.getN();

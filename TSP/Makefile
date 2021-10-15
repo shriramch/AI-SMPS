@@ -29,4 +29,4 @@ greedyTSP.o: greedyTSP.cpp GraphTSP.hpp
 	$(CC) $(CFLAGS) -c greedyTSP.cpp
 
 clean:
-	rm *o main
+	rm *o TSP

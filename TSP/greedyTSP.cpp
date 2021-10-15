@@ -4,7 +4,7 @@ vector<int> Graph::greedyTSP() {
   double cost = 0.0;
   double minE = DBL_MAX;
   set<int> vis;
-  int n = 4;
+  int n = getN();
   vector<int> cycle(n);
   for (int i = 0; i < n; ++i) {
     for (int j = i + 1; j < n; ++j) {
