@@ -3,14 +3,21 @@
 #define SET_CNT 400
 #define TIMEOUT 310
 
-void Graph::random() {
+void Graph::random_tour() {
+  cout << "random thread" << endl;
   int n = getN();
+  cout << n << endl;
   vector<int> temp(n);
   iota(temp.begin(), temp.end(), 0);
+  for (auto i : temp) {
+    cout << i << " ";
+  }
+  cout << endl;
   auto start = std::chrono::steady_clock::now();
   while (true) {
     random_shuffle(temp.begin(), temp.end());
     best_tours.insert({tourCost(temp), temp});
+    cout << "bbb" << tourCost(temp) << endl;
     if (best_tours.size() > SET_CNT) {
       auto fi = best_tours.end();
       --fi;
@@ -21,5 +28,5 @@ void Graph::random() {
 }
 
 void random_tour(Graph G) {
-  G.random();
+  G.random_tour();
 }

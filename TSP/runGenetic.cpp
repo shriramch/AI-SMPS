@@ -16,7 +16,7 @@ void generate_cycles(int cnt, int N, vector<vector<int>> &cycles) {
   vector<int> temp(N);
   iota(temp.begin(), temp.end(), 0);
   cycles.clear();
-  for (int i = 1; i < cnt; ++i) {
+  for (int i = 0; i < cnt; ++i) {
     cycles.push_back(temp);
     random_shuffle(cycles[i].begin(), cycles[i].end());
   }
@@ -34,6 +34,7 @@ void combine_cycles(int cnt,
 }
 
 void runGenetic(Graph G) {
+  cout << "genetic thread" << endl;
   ofstream plot;
   plot.open("plot.txt");
   int n = G.getN();

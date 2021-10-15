@@ -17,7 +17,7 @@ class Graph {
   int getN();
   double tourCost(vector<int> &);
   vector<int> greedyTSP();
-  void random();
+  void random_tour();
 };
 
 Graph input();
