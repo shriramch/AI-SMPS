@@ -1,28 +1,10 @@
-/**
- *
- * Definitions and assumptions
- * 1. The number of cities 'numCities' is known
- * 2. A 'city' is an integer between [0, numCities-1]
- * 3. A 'tour' (also referred to as a 'chromosome') is a vector of length numCities containing numCities many distinct cities
- * 4. The 'fitness' of a tour is defined to be some function that varies inversely with the length of the tour. (Define this later)
- * 5. A 'population' is a collection of tours
- *
- *
- * We will assume that we are given a population of P (an even number) tours ("Chromosomes")
- * Step 1. Evaluate the fitness of each chromosome
- * Step 2. Select a 'mating pool' of size P based on fitness
- * Step 3. Mate pairs from the mating pool to generate a new 'generation' and return this
-*/
-
 #include "GraphTSP.hpp"
 
-bool debug = false; //set this to true if you want debug messages
-std::random_device rd;     // only used once to initialise (seed) engine
-std::mt19937 rng(rd());    // random-number engine used (Mersenne-Twister in this case)
+bool debug = false;
+std::random_device rd;
+std::mt19937 rng(rd());
 
 std::uniform_real_distribution<float> uniReal(0.0, 1.0);
-//--------------------------------------------------
-//OVERLOADED Prints. These should probably live in a different file.
 
 void print(vector<int> tour) {
   if (!debug) return;
@@ -45,10 +27,8 @@ void print(string k) {
   cout << k;
 }
 
-//--------------------------------------------------
-
 void mutate(vector<int> &pop) {
-  std::uniform_int_distribution<int> uni(0, pop.size() - 2); // guaranteed unbiased
+  std::uniform_int_distribution<int> uni(0, pop.size() - 2);
   double rndNumber = uniReal(rng);
   if (rndNumber < 0.5) {
     print("mutating");
@@ -64,8 +44,8 @@ void mutate(vector<int> &pop) {
 }
 
 void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut, Graph G) {
-  int popSize = popIn.size(); // must be even
-  vector<double> fitness; // will contain fitness of ith tour
+  int popSize = popIn.size();
+  vector<double> fitness;
   double totalFitness = 0;
   for (auto v: popIn) {
     double k = G.tourCost(v);
@@ -73,7 +53,7 @@ void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut, Grap
     totalFitness += (1 / k);
   }
 
-  vector<double> probab; // probability that ith tour gets chosen
+  vector<double> probab;
   for (auto f: fitness) {
     probab.push_back(f / totalFitness);
   }

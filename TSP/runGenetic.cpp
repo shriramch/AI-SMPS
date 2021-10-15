@@ -12,7 +12,7 @@ void printTour(vector<int> &tour) {
   cout << endl;
 }
 
-void generate_cycles(int cnt, int N, vector<vector<int>> &cycles) {
+void generate_cycles(int cnt, int N, vector<vector<int>> &cycles, vector<int> &greedyTour = vector<int>(0)) {
   vector<int> temp(N);
   iota(temp.begin(), temp.end(), 0);
   cycles.clear();
@@ -20,15 +20,18 @@ void generate_cycles(int cnt, int N, vector<vector<int>> &cycles) {
     cycles.push_back(temp);
     random_shuffle(cycles[i].begin(), cycles[i].end());
   }
+  if (!greedyTour.empty()) {
+    cycles[cnt - 1] = greedyTour;
+  }
 }
 
 void combine_cycles(int cnt,
                     int N,
                     vector<vector<int>> &cycles,
-                    set<pair<double, vector < int >>, greater<pair<double, vector < int>> > > &top_random) {
+                    set<pair<double, vector < int >>, greater<pair<double, vector < int>>> > &top_random) {
   generate_cycles(cnt, N, cycles);
   int i = 0;
-  for (auto j = top_random.begin(); i < (int)cycles.size() && j != top_random.end(); ++i, ++j) {
+  for (auto j = top_random.begin(); i<(int)cycles.size() &&j != top_random.end();++i, ++j) {
     cycles[i] = (*j).second;
   }
 }
@@ -39,9 +42,9 @@ void runGenetic(Graph G) {
   plot.open("plot.txt");
   int n = G.getN();
   srand(time(0));
+  vector<int> greedyTour = G.greedyTSP();
   vector<vector<int>> cycles;
-  generate_cycles(GEN_CNT, n, cycles);
-  //cycles[0] = G.greedyTSP();
+  generate_cycles(GEN_CNT, n, cycles, greedyTour);
   assert(!((int) cycles.size() & 1));
   int first = -1;
   double firstCost = DBL_MAX;
@@ -57,9 +60,9 @@ void runGenetic(Graph G) {
   float bestCost = numeric_limits<float>::infinity();
   auto start = std::chrono::steady_clock::now();
   int set = 0;
-  while (true) { //make this while true
+  while (true) {
     if (set == 0) {
-      generate_cycles(GEN_CNT, n, cycles);
+      generate_cycles(GEN_CNT, n, cycles, greedyTour);
     } else {
       auto top_random = G.best_tours;
       combine_cycles(GEN_CNT, n, cycles, top_random);
@@ -110,7 +113,6 @@ void runGenetic(Graph G) {
       }
       cycles = new_cycles;
       crossed.clear();
-      //if(std::chrono::steady_clock::now() - start > std::chrono::seconds{1}) break;
     }
 
     if (std::chrono::steady_clock::now() - start > std::chrono::seconds{TIMEOUT}) break;

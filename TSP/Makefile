@@ -1,8 +1,8 @@
 CC = g++
 CFLAGS = -std=c++17 -g -pthread
 
-main: main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o random.o GraphTSP.hpp
-	$(CC) $(CFLAGS) -o main main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o random.o
+main: main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o random.o greedyTSP.o GraphTSP.hpp
+	$(CC) $(CFLAGS) -o TSP main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o random.o greedyTSP.o
 
 main.o: main.cpp GraphTSP.hpp
 	$(CC) $(CFLAGS) -c main.cpp 
@@ -24,6 +24,9 @@ Graph.o: Graph.cpp GraphTSP.hpp
 
 random.o: random.cpp GraphTSP.hpp
 	$(CC) $(CFLAGS) -c random.cpp
+
+greedyTSP.o: greedyTSP.cpp GraphTSP.hpp
+	$(CC) $(CFLAGS) -c greedyTSP.cpp
 
 clean:
 	rm *o main

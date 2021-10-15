@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+#include "GraphTSP.hpp"
 
 vector<int> GraphTSP::greedyTSP() {
   double cost = 0.0;
@@ -32,15 +32,3 @@ vector<int> GraphTSP::greedyTSP() {
   }
   return cycle;
 }
-
-// int main() {
-// adj = {{-1, 30, 25, 10},
-// {15, -1, 20, 40},
-// {10, 20, -1, 25},
-// {30, 10, 20, -1}};
-// vector<int> cyc = greedyTSP();
-// for (int i = 0; i < cyc.size(); ++i) {
-// cout << cyc[i] << " ";
-// }
-// cout << endl;
-// }
