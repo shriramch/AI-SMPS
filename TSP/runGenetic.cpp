@@ -12,7 +12,7 @@ void printTour(vector<int> &tour) {
   cout << endl;
 }
 
-void generate_cycles(int cnt, int N, vector<vector<int>> &cycles, vector<int> &greedyTour = vector<int>(0)) {
+void generate_cycles(int cnt, int N, vector<vector<int>> &cycles, vector<int> greedyTour = vector<int>(0)) {
   vector<int> temp(N);
   iota(temp.begin(), temp.end(), 0);
   cycles.clear();
