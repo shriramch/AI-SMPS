@@ -1,6 +1,6 @@
 #include "GraphTSP.hpp"
 
-vector<int> GraphTSP::greedyTSP() {
+vector<int> Graph::greedyTSP() {
   double cost = 0.0;
   double minE = DBL_MAX;
   set<int> vis;
