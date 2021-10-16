@@ -1,14 +1,6 @@
-# Makefile for Writing Make Files Example
- 
-# *****************************************************
-# Variables to control Makefile operation
- 
 CC = g++
 CFLAGS = -std=c++11 -g -pthread
- 
-# ****************************************************
-# Targets needed to bring the executable up to date
- 
+
 main: main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o GraphTSP.hpp
 	$(CC) $(CFLAGS) -o TSP main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o
  
