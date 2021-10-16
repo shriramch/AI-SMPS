@@ -10,7 +10,7 @@ CFLAGS = -std=c++11 -g -pthread
 # Targets needed to bring the executable up to date
  
 main: main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o GraphTSP.hpp
-	$(CC) $(CFLAGS) -o main main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o
+	$(CC) $(CFLAGS) -o TSP main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o
  
 # The main.o target can be written more simply
 
@@ -33,4 +33,4 @@ Graph.o: Graph.cpp GraphTSP.hpp
 	$(CC) $(CFLAGS) -c Graph.cpp 
 
 clean:
-	rm *o main
+	rm *o TSP
