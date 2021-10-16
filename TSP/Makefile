@@ -1,8 +1,10 @@
 CC = g++
-CFLAGS = -std=c++17 -g -pthread
+CFLAGS = -std=c++11 -g -pthread
 
-main: main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o random.o greedyTSP.o GraphTSP.hpp
-	$(CC) $(CFLAGS) -o TSP main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o random.o greedyTSP.o
+main: main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o GraphTSP.hpp
+	$(CC) $(CFLAGS) -o TSP main.o input.o crossover.o newGeneration.o runGenetic.o Graph.o
+ 
+# The main.o target can be written more simply
 
 main.o: main.cpp GraphTSP.hpp
 	$(CC) $(CFLAGS) -c main.cpp 
@@ -21,12 +23,6 @@ runGenetic.o: runGenetic.cpp GraphTSP.hpp
 
 Graph.o: Graph.cpp GraphTSP.hpp
 	$(CC) $(CFLAGS) -c Graph.cpp 
-
-random.o: random.cpp GraphTSP.hpp
-	$(CC) $(CFLAGS) -c random.cpp
-
-greedyTSP.o: greedyTSP.cpp GraphTSP.hpp
-	$(CC) $(CFLAGS) -c greedyTSP.cpp
 
 clean:
 	rm *o TSP

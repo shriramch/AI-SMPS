@@ -30,7 +30,7 @@ void print(string k) {
 void mutate(vector<int> &pop) {
   std::uniform_int_distribution<int> uni(0, pop.size() - 2);
   double rndNumber = uniReal(rng);
-  if (rndNumber < 0.5) {
+  if (rndNumber < 0.3) {
     print("mutating");
     print("initial ");
     print(pop);
@@ -44,7 +44,7 @@ void mutate(vector<int> &pop) {
 }
 
 void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut, Graph G) {
-  int popSize = popIn.size();
+  int popSize = popIn.size()
   vector<double> fitness;
   double totalFitness = 0;
   for (auto v: popIn) {

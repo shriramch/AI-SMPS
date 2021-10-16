@@ -1,8 +1,17 @@
 #include "GraphTSP.hpp"
-
-#define GEN_CNT 2000
+#include <thread>
+#define GEN_CNT 100
 #define TIMEOUT 310
-#define ROUNDS 1000
+
+std::random_device rd1;     // only used once to initialise (seed) engine
+std::mt19937 rng1(rd1());    // random-number engine used (Mersenne-Twister in this case)
+std::uniform_real_distribution<float> uniReal2(0.0, 1.0);
+
+float bestCost = numeric_limits<float>::infinity();
+vector<int> bestTour;
+
+bool grandify = true;
+bool printcost = false;
 
 void printTour(vector<int> &tour) {
   int N = (int) tour.size();
@@ -12,38 +21,115 @@ void printTour(vector<int> &tour) {
   cout << endl;
 }
 
-void generate_cycles(int cnt, int N, vector<vector<int>> &cycles, vector<int> greedyTour = vector<int>(0)) {
-  vector<int> temp(N);
-  iota(temp.begin(), temp.end(), 0);
-  cycles.clear();
-  for (int i = 0; i < cnt; ++i) {
-    cycles.push_back(temp);
-    random_shuffle(cycles[i].begin(), cycles[i].end());
+void generate_cycles(int cnt, int N, vector<vector<int>> &cycles, Graph G, bool randify = false) {
+  if (cycles.size() == 0 || randify) {
+    vector<int> temp(N);
+    iota(temp.begin(), temp.end(), 0);
+    cycles.clear();
+    for (int i = 0; i < cnt; ++i) {
+      cycles.push_back(temp);
+      random_shuffle(cycles[i].begin(), cycles[i].end());
+    }
+    if (grandify) {
+      std::uniform_int_distribution<int> uni2(0, cycles[0].size() - 2); // guaranteed unbiased
+      double t = 15 / (double) cnt;
+      t *= 1000;
+      int k = t;
+      for (int i = 0; i < cycles.size(); i++) {
+        auto start = std::chrono::steady_clock::now();
+        while (std::chrono::steady_clock::now() - start < std::chrono::milliseconds{k}) {
+          int i1 = uni2(rng1);
+          int i2 = uni2(rng1);
+          //double mut = uniReal2(rng1);
+          if (i1 > i2) swap(i1, i2);
+          auto oldCycle = cycles[i];
+          reverse(cycles[i].begin() + i1, cycles[i].begin() + i2);
+          if (G.tourCost(cycles[i]) >= G.tourCost(oldCycle)) {
+            cycles[i] = oldCycle;
+          } else {
+            double cos = G.tourCost(cycles[i]);
+            if (bestCost > cos) {
+              bestCost = cos;
+              bestTour = cycles[i];
+              printTour(bestTour);
+              if (printcost) cout << "cost = " << bestCost;
+            }
+          }
+        }
+      }
+    }
+  } else {
+    std::uniform_int_distribution<int> uni1(0, cycles[0].size() - 2); // guaranteed unbiased
+    for (int i = 0; i < cycles.size(); i++) {
+      int i1 = uni1(rng1);
+      int i2 = uni1(rng1);
+      if (i1 > i2) swap(i1, i2);
+      auto oldCycle = cycles[i];
+      reverse(cycles[i].begin() + i1, cycles[i].begin() + i2);
+    }
   }
-  if (!greedyTour.empty()) {
-    cycles[cnt - 1] = greedyTour;
+  if (G.tourCost(cycles[0]) < bestCost) {
+    bestTour = cycles[0];
+    bestCost = G.tourCost(cycles[0]);
   }
 }
 
-void combine_cycles(int cnt,
-                    int N,
-                    vector<vector<int>> &cycles,
-                    set<pair<double, vector < int >>, greater<pair<double, vector < int>>> > &top_random) {
-  generate_cycles(cnt, N, cycles);
-  int i = 0;
-  for (auto j = top_random.begin(); i<(int)cycles.size() &&j != top_random.end();++i, ++j) {
-    cycles[i] = (*j).second;
+void printTours() {
+  ofstream plot;
+  plot.open("plot.txt");
+  plot.close();
+
+  while (1) {
+    auto start = std::chrono::steady_clock::now();
+    plot.open("plot.txt", std::ios_base::app);
+    plot << bestCost << ",";
+    plot.close();
+    while (std::chrono::steady_clock::now() - start < std::chrono::milliseconds{100}) { ;
+    }
   }
+
 }
 
 void runGenetic(Graph G) {
-  ofstream plot;
-  plot.open("plot.txt");
+
   int n = G.getN();
   srand(time(0));
-  vector<int> greedyTour = G.greedyTSP();
   vector<vector<int>> cycles;
-  generate_cycles(GEN_CNT, n, cycles, greedyTour);
+  vector<int> tem(n);
+  bestTour = tem;
+  iota(bestTour.begin(), bestTour.end(), 0);
+  bestCost = G.tourCost(bestTour);
+  thread t1(printTours);
+  generate_cycles(GEN_CNT, n, cycles, G, false);
+  printTour(bestTour);
+  if (printcost) cout << "cost = " << G.tourCost(bestTour) << endl;
+  if (grandify) {
+    std::uniform_int_distribution<int> uni2(0, cycles[0].size() - 2); // guaranteed unbiased
+    int k = 0;
+    int tot = 0;
+    while (1) {
+      tot++;
+      int i1 = uni2(rng1);
+      int i2 = uni2(rng1);
+      if (i1 > i2) swap(i1, i2);
+      vector<int> oldCycle(cycles[0]);
+      reverse(cycles[0].begin() + i1, cycles[0].begin() + i2);
+      if (G.tourCost(cycles[0]) >= G.tourCost(oldCycle)) {
+        cycles[0] = oldCycle;
+      } else {
+        // plot<<G.tourCost(cycles[0])<<",";
+        k = tot;
+        double cos = G.tourCost(cycles[0]);
+        if (bestCost > cos) {
+          bestCost = cos;
+          bestTour = cycles[0];
+          printTour(bestTour);
+          if (printcost) cout << "cost = " << bestCost;
+        }
+      }
+      if (tot - k > 1000000) break;
+    }
+  }
   assert(!((int) cycles.size() & 1));
   int first = -1;
   double firstCost = DBL_MAX;
@@ -54,55 +140,57 @@ void runGenetic(Graph G) {
       firstCost = curCost;
     }
   }
-  plot << firstCost << ",";
-  vector<int> bestTour;
-  float bestCost = numeric_limits<float>::infinity();
+  //plot<<firstCost<<",";
   auto start = std::chrono::steady_clock::now();
-  int set = 0;
-  while (true) {
-    if (set == 0) {
-      generate_cycles(GEN_CNT, n, cycles, greedyTour);
-    } else {
-      auto top_random = G.best_tours;
-      combine_cycles(GEN_CNT, n, cycles, top_random);
+  int r = 0;
+  int g = 0;
+  int bestRound = -1;
+  while (true) { //make this while true
+    if (g > 1) generate_cycles(GEN_CNT, n, cycles, G, (g - bestRound > 5000) && g > 2 * bestRound);
+    if (g - bestRound > 5000 && g > 2 * bestRound) {
+      bestRound = g;
     }
-    ++set;
-    int r = 0;
-    while (r < ROUNDS) {
+    r = bestRound;
+    while (1) {
       r++;
+      g++;
       vector<vector<int>> crossed(cycles);
       newGeneration(cycles, crossed, G);
       assert(cycles.size() == crossed.size());
-      vector < pair < double, pair < int, int >>> final_c;
+      set < pair < double, pair < int, int >>, less < pair < double, pair < int, int > > > > final;
       int N = (int) cycles.size();
       for (int i = 0; i < N; ++i) {
-        final_c.push_back({G.tourCost(cycles[i]), {1, i}});
+        final.insert({G.tourCost(cycles[i]), {1, i}});
       }
       for (int i = 0; i < N; ++i) {
-        final_c.push_back({G.tourCost(crossed[i]), {2, i}});
+        final.insert({G.tourCost(crossed[i]), {2, i}});
       }
-      if (final_c[0].second.first == 1) {
-        float costi = G.tourCost(cycles[final_c[0].second.second]);
+      if ((*final.begin()).second.first == 1) {
+        float costi = G.tourCost(cycles[(*final.begin()).second.second]);
         if (costi < bestCost) {
           bestCost = costi;
-          bestTour = cycles[final_c[0].second.second];
+          bestTour = cycles[(*final.begin()).second.second];
+          printTour(bestTour);
+          if (printcost) cout << "cost = " << bestCost << endl;
+          bestRound = r;
         }
-        plot << bestCost << ",";
-        printTour(bestTour);
+        //plot<<bestCost<<",";
+
       } else {
-        float costi = G.tourCost(crossed[final_c[0].second.second]);
+        float costi = G.tourCost(crossed[(*final.begin()).second.second]);
         if (costi < bestCost) {
           bestCost = costi;
-          bestTour = crossed[final_c[0].second.second];
+          bestTour = crossed[(*final.begin()).second.second];
+          printTour(bestTour);
+          bestRound = r;
+          if (printcost) cout << "cost = " << bestCost << endl;
+
         }
-        plot << bestCost << ",";
-        printTour(bestTour);
+        //plot<<bestCost<<",";
       }
       vector<vector<int>> new_cycles;
-      sort(final_c.begin(), final_c.end());
-      reverse(final_c.begin(), final_c.end());
-      auto fi = final_c.begin();
-      while ((int) new_cycles.size() < n) {
+      auto fi = final.begin();
+      while ((int) new_cycles.size() < GEN_CNT) {
         if ((*fi).second.first == 1) {
           new_cycles.push_back(cycles[(*fi).second.second]);
         } else {
@@ -112,9 +200,12 @@ void runGenetic(Graph G) {
       }
       cycles = new_cycles;
       crossed.clear();
+      if (r - bestRound > 200) {
+        break;
+      }
     }
 
     if (std::chrono::steady_clock::now() - start > std::chrono::seconds{TIMEOUT}) break;
   }
-  plot.close();
+  exit(0);
 }
