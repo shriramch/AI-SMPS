@@ -44,7 +44,7 @@ void mutate(vector<int> &pop) {
 }
 
 void newGeneration(vector<vector<int>> &popIn, vector<vector<int>> &popOut, Graph G) {
-  int popSize = popIn.size()
+  int popSize = popIn.size();
   vector<double> fitness;
   double totalFitness = 0;
   for (auto v: popIn) {
