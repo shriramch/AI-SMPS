@@ -45,8 +45,23 @@ MyBot::MyBot( Turn turn )
 {
 }
 
-ld eval(Move move) {
+int num_valid_moves(Turn turn, OthelloBoard board){
+    return board.getValidMoves(turn).size();
+}
 
+ld eval(Move move, OthelloBoard board, Turn turn){
+    //assumes that move is a valid move for the given turn
+    OthelloBoard temp = board;
+    temp.makeMove(turn, move); //temp is the board after the move was made
+    ld m;
+    int my_mobility = num_valid_moves(turn, temp);
+    int opp_mobility = num_valid_moves(other(turn), temp);
+	if(my_mobility > opp_mobility)
+		m = (100.0 * my_mobility)/(my_mobility + opp_mobility);
+	else if(my_mobility < opp_mobility)
+		m = -(100.0 * opp_mobility)/(my_mobility + opp_mobility);
+	else m = 0;
+    return m;
 }
 
 ld alpha_beta(OthelloBoard board, int depth, Move move, Turn turn, ld alpha, ld beta) {
