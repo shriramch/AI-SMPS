@@ -16,6 +16,7 @@
 using namespace std;
 using namespace Desdemona;
 #define TL 2
+#define F 0.9
 
 ld min(ld &a, ld &b) {
     if (a < b) return a; else return b;
@@ -71,7 +72,7 @@ ld eval(Move move, OthelloBoard board, Turn turn){
 
 ld alpha_beta(OthelloBoard board, int depth, Move move, Turn turn, ld alpha,
               ld beta) {
-  if ((ld)(clock() - start) / CLOCKS_PER_SEC > 0.99 * TL) {
+  if ((ld)(clock() - start) / CLOCKS_PER_SEC > F * TL) {
       if (depth & 1) {
           return -INF;
       } else {
@@ -119,17 +120,20 @@ Move MyBot::play( const OthelloBoard& board )
 {
     start = clock();
     list<Move> moves = board.getValidMoves( turn );
-    int randNo = rand() % moves.size();
     list<Move>::iterator it = moves.begin();
     max_depth = 2;
     Move best_of_best = *it;
     ld best_val = -INF;
     while(true) {
+        //cout << "depth" << max_depth << endl;
+        //cout << "time" << (ld)(clock() - start) / CLOCKS_PER_SEC << endl;
         Move best_move = *it;
         ld best = -INF;
         ld alpha = -INF, beta = +INF;
+        bool flag = 0;
         for (auto move: moves) {
-            if ((ld)(clock() - start) / CLOCKS_PER_SEC > 0.99 * TL) {
+            if ((ld)(clock() - start) / CLOCKS_PER_SEC > F * TL) {
+                flag = 1;
                 break;
             }
             ld eval = alpha_beta(board, 0, move, turn, alpha, beta);
@@ -143,6 +147,9 @@ Move MyBot::play( const OthelloBoard& board )
             best_val = best;
         }
         max_depth += 1;
+        if (flag) {
+            break;
+        }
     }
     return best_of_best;
 }
