@@ -10,13 +10,17 @@
 #include "OthelloPlayer.h"
 #include <cstdlib>
 #include <ctime>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <map>
 
 #define INF 1e18
 #define ld long double
 using namespace std;
 using namespace Desdemona;
 #define TL 2
-#define F 0.9
+#define F 0.95
 
 ld min(ld &a, ld &b) {
     if (a < b) return a; else return b;
@@ -27,7 +31,7 @@ ld max(ld &a, ld &b) {
 }
 
 clock_t start, finish;
-int max_depth = 0;
+short int max_depth = 0;
 
 class MyBot: public OthelloPlayer
 {
@@ -70,7 +74,7 @@ ld eval(Move move, OthelloBoard board, Turn turn){
     return m;
 }
 
-ld alpha_beta(OthelloBoard board, int depth, Move move, Turn turn, ld alpha,
+ld alpha_beta(OthelloBoard board, short int depth, Move move, Turn turn, ld alpha,
               ld beta) {
   if ((ld)(clock() - start) / CLOCKS_PER_SEC > F * TL) {
       if (depth & 1) {
@@ -119,14 +123,16 @@ ld alpha_beta(OthelloBoard board, int depth, Move move, Turn turn, ld alpha,
 Move MyBot::play( const OthelloBoard& board )
 {
     start = clock();
-    list<Move> moves = board.getValidMoves( turn );
-    list<Move>::iterator it = moves.begin();
+    list<Move> moves_list = board.getValidMoves( turn );
+    vector<Move> moves(moves_list.begin(), moves_list.end());
+    auto it = moves.begin();
     max_depth = 2;
     Move best_of_best = *it;
     ld best_val = -INF;
+    vector<ld> scores;
+    vector<int> indices(moves.size());
+    iota(indices.begin(), indices.end(), 0);
     while(true) {
-        //cout << "depth" << max_depth << endl;
-        //cout << "time" << (ld)(clock() - start) / CLOCKS_PER_SEC << endl;
         Move best_move = *it;
         ld best = -INF;
         ld alpha = -INF, beta = +INF;
@@ -141,6 +147,7 @@ Move MyBot::play( const OthelloBoard& board )
                 eval = best;
                 best_move = move;
             }
+            scores.push_back(eval);
         }
         if (best > best_val) {
             best_of_best = best_move;
@@ -150,6 +157,14 @@ Move MyBot::play( const OthelloBoard& board )
         if (flag) {
             break;
         }
+        sort(indices.begin(), indices.end(), [&](int A, int B) -> bool {
+            return scores[A] < scores[B];
+        });
+        vector<Move> moves_set;
+        for(int i: indices) {
+            moves_set.push_back(moves[i]);
+        }
+        moves = moves_set;
     }
     return best_of_best;
 }
