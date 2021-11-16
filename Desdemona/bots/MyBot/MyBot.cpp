@@ -59,10 +59,27 @@ int num_valid_moves(Turn turn, OthelloBoard board){
     return board.getValidMoves(turn).size();
 }
 
+// ld eval(Move move, OthelloBoard board, Turn turn){
+//     //assumes that move is a valid move for the given turn
+//     OthelloBoard temp = board;
+//     temp.makeMove(turn, move); //temp is the board after the move was made
+//     ld m;
+//     int my_mobility = num_valid_moves(turn, temp);
+//     int opp_mobility = num_valid_moves(other(turn), temp);
+// 	if(my_mobility > opp_mobility)
+// 		m = (100.0 * my_mobility)/(my_mobility + opp_mobility);
+// 	else if(my_mobility < opp_mobility)
+// 		m = -(100.0 * opp_mobility)/(my_mobility + opp_mobility);
+// 	else m = 0;
+//     return m;
+// }
+
 ld eval(Move move, OthelloBoard board, Turn turn){
     //assumes that move is a valid move for the given turn
     OthelloBoard temp = board;
     temp.makeMove(turn, move); //temp is the board after the move was made
+   
+    // mobility criteria 
     ld m;
     int my_mobility = num_valid_moves(turn, temp);
     int opp_mobility = num_valid_moves(other(turn), temp);
@@ -71,8 +88,114 @@ ld eval(Move move, OthelloBoard board, Turn turn){
 	else if(my_mobility < opp_mobility)
 		m = -(100.0 * opp_mobility)/(my_mobility + opp_mobility);
 	else m = 0;
-    return m;
+    
+    ld d = 0.0, p = 0.0, f = 0.0;
+    int my_front_tiles = 0, opp_front_tiles = 0, my_tiles = 0, opp_tiles = 0;
+    int i,j,k, x, y;
+    
+    int X1[] = {-1, -1, 0, 1, 1, 1, 0, -1};
+	int Y1[] = {0, 1, 1, 1, 0, -1, -1, -1};
+	//int V[8][8];
+    vector< vector <int> > V;
+
+	V.push_back({20, -3, 11, 8, 8, 11, -3, 20});
+    V.push_back({-3, -7, -4, 1, 1, -4, -7, -3});
+    V.push_back({11, -4, 2, 2, 2, 2, -4, 11});
+    V.push_back({8, 1, 2, -3, -3, 2, 1, 8});
+    V.push_back({8, 1, 2, -3, -3, 2, 1, 8});
+    V.push_back({11, -4, 2, 2, 2, 2, -4, 11});
+    V.push_back({-3, -7, -4, 1, 1, -4, -7, -3});
+    V.push_back({20, -3, 11, 8, 8, 11, -3, 20});
+
+// Piece difference, frontier disks and disk squares
+	for(i=0; i<8; i++)
+		for(j=0; j<8; j++)  {
+			if(temp.get(i,j) == turn)  {
+				d += V[i][j];
+				my_tiles++;
+			} else if(temp.get(i,j) == other(turn))  {
+				d -= V[i][j];
+				opp_tiles++;
+			}
+			if(temp.get(i,j) != '-')   {
+				for(k=0; k<8; k++)  {
+					x = i + X1[k]; y = j + Y1[k];
+					if(x >= 0 && x < 8 && y >= 0 && y < 8 && temp.get(x,y) == '-') {
+						if(temp.get(i,j) == turn)  my_front_tiles++;
+						else opp_front_tiles++;
+						break;
+					}
+				}
+			}
+		}
+	if(my_tiles > opp_tiles)
+		p = (100.0 * my_tiles)/(my_tiles + opp_tiles);
+	else if(my_tiles < opp_tiles)
+		p = -(100.0 * opp_tiles)/(my_tiles + opp_tiles);
+	else p = 0;
+
+	if(my_front_tiles > opp_front_tiles)
+		f = -(100.0 * my_front_tiles)/(my_front_tiles + opp_front_tiles);
+	else if(my_front_tiles < opp_front_tiles)
+		f = (100.0 * opp_front_tiles)/(my_front_tiles + opp_front_tiles);
+	else f = 0;
+
+
+
+    // corner occupancy
+    ld c;
+    my_tiles = 0; 
+    opp_tiles = 0;
+	if(temp.get(0,0) == turn) my_tiles++;
+	else if(temp.get(0,0) == other(turn)) opp_tiles++;
+	if(temp.get(0,7) == turn) my_tiles++;
+	else if(temp.get(0,7) == other(turn)) opp_tiles++;
+	if(temp.get(7,0) == turn) my_tiles++;
+	else if(temp.get(7,0) == other(turn)) opp_tiles++;
+	if(temp.get(7,7) == turn) my_tiles++;
+	else if(temp.get(7,7) == other(turn)) opp_tiles++;
+	c = 25 * (my_tiles - opp_tiles);
+    
+    //corner closeness
+    ld l;
+    my_tiles = opp_tiles = 0;
+	if(temp.get(0,0) == '-'){
+		if(temp.get(0,1) == turn) my_tiles++;
+		else if(temp.get(0,1) == other(turn)) opp_tiles++;
+		if(temp.get(1,1) == turn) my_tiles++;
+		else if(temp.get(1,1) == other(turn)) opp_tiles++;
+		if(temp.get(1,0) == turn) my_tiles++;
+		else if(temp.get(1,0) == other(turn)) opp_tiles++;
+	}
+	if(temp.get(0,7) == '-'){
+		if(temp.get(0,6) == turn) my_tiles++;
+		else if(temp.get(0,6) == other(turn)) opp_tiles++;
+		if(temp.get(1,6) == turn) my_tiles++;
+		else if(temp.get(1,6) == other(turn)) opp_tiles++;
+		if(temp.get(1,7) == turn) my_tiles++;
+		else if(temp.get(1,7) == other(turn)) opp_tiles++;
+	}
+	if(temp.get(7,0) == '-'){
+		if(temp.get(7,1) == turn) my_tiles++;
+		else if(temp.get(7,1) == other(turn)) opp_tiles++;
+		if(temp.get(6,1) == turn) my_tiles++;
+		else if(temp.get(6,1) == other(turn)) opp_tiles++;
+		if(temp.get(6,0) == turn) my_tiles++;
+		else if(temp.get(6,0) == other(turn)) opp_tiles++;
+	}
+	if(temp.get(7,7) == '-'){
+		if(temp.get(6,7) == turn) my_tiles++;
+		else if(temp.get(6,7) == other(turn)) opp_tiles++;
+		if(temp.get(6,6) == turn) my_tiles++;
+		else if(temp.get(6,6) == other(turn)) opp_tiles++;
+		if(temp.get(7,6) == turn) my_tiles++;
+		else if(temp.get(7,6) == other(turn)) opp_tiles++;
+	}
+	l = -12.5 * (my_tiles - opp_tiles);
+    
+    return (10 * p) + (801.724 * c) + (382.026 * l) + (78.922 * m) + (74.396 * f) + (10 * d);
 }
+
 
 ld alpha_beta(OthelloBoard board, short int depth, Move move, Turn turn, ld alpha,
               ld beta) {
