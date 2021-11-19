@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <map>
 #include <numeric>
 #include <vector>
 
@@ -35,13 +36,16 @@ inline ld max(ld &a, ld &b) {
     return b;
 }
 
-class MoveSet {
-public:
-  Move move;
-  ld score;
+vector<int> X1;
+vector<int> Y1;
+vector<vector<int>> cell_V;
 
-  MoveSet(Move m, ld s) : move(m), score(s) {}
-};
+clock_t start, finish;
+short int max_depth = 0;
+
+// 18 14 697 668 59 76
+int P = 18, D = 14;
+ld C = 697, L = 668, M = 59, F = 76;
 
 class MyBot : public OthelloPlayer {
 public:
@@ -51,24 +55,17 @@ public:
    * spawning a background processing thread.
    */
 
-  ld eval(Move, OthelloBoard, Turn);
-  ld alpha_beta(OthelloBoard, short int, Move, Turn, ld, ld);
-
   MyBot(Turn turn);
+
+  /**
+   * Play something
+   */
   virtual Move play(const OthelloBoard &board);
 
 private:
-  vector<int> X1;
-  vector<int> Y1;
-  vector<vector<int>> cell_V;
-  clock_t start;
-  short int max_depth = 0;
-  int P = 18, D = 14;
-  ld C = 697, L = 668, M = 59, F = 76;
 };
 
 MyBot::MyBot(Turn turn) : OthelloPlayer(turn) {
-  max_depth = 0;
   X1 = {-1, -1, 0, 1, 1, 1, 0, -1};
   Y1 = {0, 1, 1, 1, 0, -1, -1, -1};
 
@@ -86,13 +83,30 @@ MyBot::MyBot(Turn turn) : OthelloPlayer(turn) {
   for (int i = 0; i < 4; ++i) {
     cell_V.push_back(cell_V[3 - i]);
   }
+
+  /*
+  cout << "Enter P: ";
+  cin >> P;
+  cout << "Enter D: ";
+  cin >> D;
+  cout << "Enter C: ";
+  cin >> C;
+  cout << "Enter L: ";
+  cin >> L;
+  cout << "Enter M: ";
+  cin >> M;
+  cout << "Enter F: ";
+  cin >> F;
+  int P = 10, D = 10;
+  ld C = 801.724, L = 382.026, M = 78.922, F = 74.396;
+  */
 }
 
 inline int num_valid_moves(Turn turn, OthelloBoard &board) {
   return board.getValidMoves(turn).size();
 }
 
-ld MyBot::eval(Move move, OthelloBoard board, Turn turn) {
+ld eval(Move move, OthelloBoard board, Turn turn) {
   // assumes that move is a valid move for the given turn
   OthelloBoard temp = board;
   temp.makeMove(turn, move); // temp is the board after the move was made
@@ -233,11 +247,46 @@ ld MyBot::eval(Move move, OthelloBoard board, Turn turn) {
   else
     m = 0;
 
+  /*int fact = 0;
+  Turn opposite = other(turn);
+  int i = 0;
+  int sum = 0;
+      while(i < 8) {
+      int j = 0;
+              while(j < 8) {
+                      if(board.get(i,j) == turn)
+                              sum += cell_V[i][j];
+                      else if(board.get(i,j) == opposite)
+                              sum -= cell_V[i][j];
+          ++j;
+              }
+      ++i;
+      }
+
+  int xvals[4] = {shu, shu, saat, saat};
+  int yvals[4] = {shu, saat, shu, saat};
+
+      int Is[12] = {shu,ek,ek, shu,ek,ek, che,saat,che, che,saat,che};
+      int Js[12] = {ek,shu,ek, che,saat,che, shu,ek,ek, saat,che,che};
+
+  i = 0;
+      while(i < 12){
+          if(board.get(xvals[i/3],yvals[i/3]) != EMPTY) {
+              if(board.get(Is[i],Js[i]) == turn)
+                  sum += (5 - cell_V[Is[i]][Js[i]]);
+
+          else if(board.get(Is[i],Js[i]) == opp)
+                  sum -= (5 - cell_V[Is[i]][Js[i]]);
+          }
+      ++i;
+      }
+      return sum;*/
+
   return (P * p) + (C * c) + (L * l) + (M * m) + (F * f) + (D * d);
 }
 
-ld MyBot::alpha_beta(OthelloBoard board, short int depth, Move move, Turn turn,
-                     ld alpha, ld beta) {
+ld alpha_beta(OthelloBoard board, short int depth, Move move, Turn turn,
+              ld alpha, ld beta) {
   if ((ld)(clock() - start) / CLOCKS_PER_SEC >= FRAC * TL) {
     if (depth & 1) {
       return -INF;
@@ -245,38 +294,39 @@ ld MyBot::alpha_beta(OthelloBoard board, short int depth, Move move, Turn turn,
       return INF;
     }
   }
-  if (depth == max_depth) {
-    return eval(move, board, turn);
-  } else {
-    board.makeMove(turn, move);
-    turn = other(turn);
-    list<Move> moves = board.getValidMoves(turn);
-    if (moves.empty()) {
-      if (depth & 1) {
-        return INF;
-      } else {
-        return -INF;
-      }
-    }
-    for (auto nextMove : moves) {
-      if (depth & 1) {
-        alpha = min(alpha,
-                    alpha_beta(board, depth + 1, nextMove, turn, alpha, beta));
-        if (alpha <= beta) {
-          return alpha;
-        }
-      } else {
-        beta = max(beta,
-                   alpha_beta(board, depth + 1, nextMove, turn, alpha, beta));
-        if (alpha <= beta) {
-          return beta;
-        }
-      }
-    }
-    if (depth & 1) {
-      return alpha;
+  while (true) {
+    if (depth == max_depth) {
+      return eval(move, board, turn);
     } else {
-      return beta;
+      board.makeMove(turn, move);
+      turn = other(turn);
+      list<Move> moves = board.getValidMoves(turn);
+      if (moves.empty()) {
+        if (depth & 1) {
+          return -INF;
+        } else {
+          return INF;
+        }
+      }
+      if (depth & 1) {
+        for (auto nextMove : moves) {
+          beta =
+              min(beta, alpha_beta(board, depth, nextMove, turn, alpha, beta));
+          if (alpha >= beta) {
+            return alpha;
+          }
+        }
+        return beta;
+      } else {
+        for (auto nextMove : moves) {
+          alpha =
+              max(alpha, alpha_beta(board, depth, nextMove, turn, alpha, beta));
+          if (alpha >= beta) {
+            return beta;
+          }
+        }
+        return alpha;
+      }
     }
   }
 }
@@ -284,33 +334,32 @@ ld MyBot::alpha_beta(OthelloBoard board, short int depth, Move move, Turn turn,
 Move MyBot::play(const OthelloBoard &board) {
   start = clock();
   list<Move> moves_list = board.getValidMoves(turn);
-  vector<MoveSet> moves;
-  for (Move move : moves_list) {
-    moves.push_back(MoveSet(move, -INF));
-  }
-  MoveSet dbest_moveSet = moves[0];
+  vector<Move> moves(moves_list.begin(), moves_list.end());
+  Move best_move_depth = moves[0];
+  ld best_score_depth = -INF;
   // Perform alpha-beta search with iterative deepening
   bool quit_flag = false;
   for (int i = 2; !quit_flag; i++) {
-    MoveSet best_moveSet = moves[0];
+    Move best_move = moves[0];
+    ld best_score = -INF;
     max_depth = i;
-    for (MoveSet moveSet : moves) {
+    for (auto move : moves) {
       if ((ld)(clock() - start) / CLOCKS_PER_SEC >= FRAC * TL) {
         quit_flag = true;
         break;
       }
-      ld score = alpha_beta(board, 1, moveSet.move, turn, -INF, INF);
-      if (score > best_moveSet.score) {
-        best_moveSet = moveSet;
+      ld score = alpha_beta(board, 1, move, turn, -INF, INF);
+      if (score > best_score) {
+        best_move = move;
+        best_score = score;
       }
     }
-    if (dbest_moveSet.score < best_moveSet.score) {
-      dbest_moveSet = best_moveSet;
+    if (best_score > best_score_depth) {
+      best_score_depth = best_score;
+      best_move_depth = best_move;
     }
-    sort(moves.begin(), moves.end(),
-         [](const MoveSet &a, const MoveSet &b) { return a.score > b.score; });
   }
-  return dbest_moveSet.move;
+  return best_move_depth;
 }
 
 // The following lines are _very_ important to create a bot module for Desdemona

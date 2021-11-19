@@ -10,41 +10,35 @@
 #include "Othello.h"
 #include "OthelloBoard.h"
 
-namespace Desdemona
-{
-    class OthelloPlayer
-    {
-        public:
-            Turn turn;
+namespace Desdemona {
+class OthelloPlayer {
+public:
+  Turn turn;
 
-            /**
-             * Default constructor
-             */
-            OthelloPlayer( Turn turn );
-            
-            /**
-             * Default destructor
-             */
-            virtual ~OthelloPlayer( ) {}
+  /**
+   * Default constructor
+   */
+  OthelloPlayer(Turn turn);
 
-            virtual Move play( const OthelloBoard& board );
+  /**
+   * Default destructor
+   */
+  virtual ~OthelloPlayer() {}
 
-        private:
+  virtual Move play(const OthelloBoard &board);
 
-    };
+private:
+};
 
-    class BotException : public exception
-    {
-        public:
-            const OthelloPlayer& player;
-            BotException( const OthelloPlayer& player ) throw() :
-                player( player ) {}
-            ~BotException() throw() {}
-            const char* what() const throw()
-            {
-                return "Bot threw an unhandled exception.";
-            }
-    };
-}
+class BotException : public exception {
+public:
+  const OthelloPlayer &player;
+  BotException(const OthelloPlayer &player) throw() : player(player) {}
+  ~BotException() throw() {}
+  const char *what() const throw() {
+    return "Bot threw an unhandled exception.";
+  }
+};
+} // namespace Desdemona
 
 #endif /* #ifndef OTHELLOPLAYER_H */

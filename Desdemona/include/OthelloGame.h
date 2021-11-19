@@ -7,86 +7,76 @@
  * @date 2010-01-27
  */
 
-#include "OthelloPlayer.h"
 #include "Othello.h"
+#include "OthelloPlayer.h"
 #include <string>
 using namespace std;
 
-namespace Desdemona
-{
-    class OthelloGame
-    {
-        public:
+namespace Desdemona {
+class OthelloGame {
+public:
+  /**
+   * Start a game with two players
+   */
+  OthelloGame(OthelloPlayer &player1, OthelloPlayer &player2);
 
-            /**
-             * Start a game with two players
-             */
-            OthelloGame( OthelloPlayer& player1, OthelloPlayer& player2 );
+  Turn getTurn();
+  bool validateMove(const Move &move);
+  void makeMove(const Move &move);
 
-            Turn getTurn();
-            bool validateMove( const Move& move );
-            void makeMove( const Move& move );
+  void printState();
+  /**
+   * Play a game
+   * @return - Red Count - Black Count
+   */
+  pair<int, int> startGame();
+  int replayGame(string filename);
 
-            void printState();
-            /**
-             * Play a game
-             * @return - Red Count - Black Count
-             */
-            pair<int,int> startGame();
-            int replayGame( string filename );
+protected:
+  OthelloPlayer &player1;
+  OthelloPlayer &player2;
+  OthelloBoard board;
+  Turn turn;
 
-        protected:
-            OthelloPlayer& player1;
-            OthelloPlayer& player2;
-            OthelloBoard board;
-            Turn turn;
+  /**
+   * Allows inheriters to define actions that should be performed
+   * after a move is played.
+   */
+  virtual void postPlayActions(Move &move);
 
-            /**
-             * Allows inheriters to define actions that should be performed
-             * after a move is played.
-             */
-            virtual void postPlayActions( Move& move );
+  bool isGameOver();
+};
 
-            bool isGameOver( );
-    };
+class TimeoutException : public exception {
+public:
+  const OthelloPlayer &player;
+  int red, black;
+  TimeoutException(const OthelloPlayer &player, int a, int b) throw()
+      : player(player) {
+    black = a;
+    red = b;
+  }
+  ~TimeoutException() throw() {}
 
-    class TimeoutException: public exception
-    {
-        public:
-            const OthelloPlayer& player;
-		int red, black;
-            TimeoutException( const OthelloPlayer& player, int a, int b ) throw():
-                player( player ) {
-			black = a;
-			red = b;
-		}
-            ~TimeoutException() throw() {}
+  const char *what() { return "Player timed out"; }
+};
 
-            const char* what() 
-            {
-                return "Player timed out";
-            }
-    };
+class BotInvalidMoveException : public InvalidMoveException {
+public:
+  const OthelloPlayer &player;
+  int red, black;
 
-    class BotInvalidMoveException: public InvalidMoveException
-    {
-        public:
-            const OthelloPlayer& player;
-		int red, black;
+  BotInvalidMoveException(const OthelloPlayer &player, const Move &move, int a,
+                          int b) throw()
+      : InvalidMoveException(move), player(player) {
+    black = a;
+    red = b;
+  }
+  ~BotInvalidMoveException() throw() {}
 
-            BotInvalidMoveException( const OthelloPlayer& player, const Move& move, int a, int b ) throw():
-                InvalidMoveException( move ), player( player ) {
-			black = a;
-			red = b;
-		}
-            ~BotInvalidMoveException() throw() {}
+  const char *what() { return "Player timed out"; }
+};
 
-            const char* what() 
-            {
-                return "Player timed out";
-            }
-    };
-
-}
+} // namespace Desdemona
 
 #endif /* #ifndef OTHELLOGAME_H */
