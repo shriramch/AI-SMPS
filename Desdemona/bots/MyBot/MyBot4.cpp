@@ -56,8 +56,7 @@ private:
   vector<vector<int>> cellValue;
   clock_t start;
   short max_depth;
-  int P, D;
-  ld C, L, M, F;
+  ld P, D, C, L, M, F;
 };
 
 MyBot::MyBot(Turn turn) : OthelloPlayer(turn) {
@@ -148,7 +147,7 @@ ld MyBot::evaluate(OthelloBoard &board, Turn turn) {
 
   // Corner closeness
   myTiles = oppTiles = 0;
-  for (int i = 0; i < 4; ++i) {
+  /*for (int i = 0; i < 0; ++i) {
     int X = 7 * (i & 1);
     int Y = 7 * (i & 2) / 2;
     int dX = (X == 0) ? 1 : -1;
@@ -167,8 +166,64 @@ ld MyBot::evaluate(OthelloBoard &board, Turn turn) {
       else if (board.get(X + dX, Y) == turn)
         ++oppTiles;
     }
+  }*/
+  if (board.get(0, 0) == EMPTY) {
+    if (board.get(0, 1) == turn)
+      myTiles++;
+    else if (board.get(0, 1) == other(turn))
+      oppTiles++;
+    if (board.get(1, 1) == turn)
+      myTiles++;
+    else if (board.get(1, 1) == other(turn))
+      oppTiles++;
+    if (board.get(1, 0) == turn)
+      myTiles++;
+    else if (board.get(1, 0) == other(turn))
+      oppTiles++;
   }
-  l = -10 * (myTiles - oppTiles);
+  if (board.get(0, 7) == EMPTY) {
+    if (board.get(0, 6) == turn)
+      myTiles++;
+    else if (board.get(0, 6) == other(turn))
+      oppTiles++;
+    if (board.get(1, 6) == turn)
+      myTiles++;
+    else if (board.get(1, 6) == other(turn))
+      oppTiles++;
+    if (board.get(1, 7) == turn)
+      myTiles++;
+    else if (board.get(1, 7) == other(turn))
+      oppTiles++;
+  }
+  if (board.get(7, 0) == EMPTY) {
+    if (board.get(7, 1) == turn)
+      myTiles++;
+    else if (board.get(7, 1) == other(turn))
+      oppTiles++;
+    if (board.get(6, 1) == turn)
+      myTiles++;
+    else if (board.get(6, 1) == other(turn))
+      oppTiles++;
+    if (board.get(6, 0) == turn)
+      myTiles++;
+    else if (board.get(6, 0) == other(turn))
+      oppTiles++;
+  }
+  if (board.get(7, 7) == EMPTY) {
+    if (board.get(6, 7) == turn)
+      myTiles++;
+    else if (board.get(6, 7) == other(turn))
+      oppTiles++;
+    if (board.get(6, 6) == turn)
+      myTiles++;
+    else if (board.get(6, 6) == other(turn))
+      oppTiles++;
+    if (board.get(7, 6) == turn)
+      myTiles++;
+    else if (board.get(7, 6) == other(turn))
+      oppTiles++;
+  }
+  l = 10 * (myTiles - oppTiles);
 
   // Mobility
   myTiles = numValidMoves(board, opp_turn);
@@ -225,42 +280,44 @@ ld MyBot::minimax(OthelloBoard board, Move move, Turn turn, short depth,
 Move MyBot::play(const OthelloBoard &board) {
   start = clock();
   list<Move> moves = board.getValidMoves(turn);
-  Move bestMove(moves.front());
-  ld bestScore = -INF;
-  ld beta = INF, alpha = -INF;
-  max_depth = 2;
+  //Move bestMove(moves.front());
+  //ld bestScore = -INF;
+  max_depth = 6;
   moves.sort([&](Move a, Move b) {
     OthelloBoard b1 = board, b2 = board;
     b1.makeMove(turn, a);
     b2.makeMove(turn, b);
     return evalMove(b1, turn) > evalMove(b2, turn);
   });
-  for (;; ++max_depth) {
-    if (((ld)(clock() - start) / CLOCKS_PER_SEC) >= TLF) {
-      break;
-    }
+  //for (;; ++max_depth) {
+    //if (((ld)(clock() - start) / CLOCKS_PER_SEC) >= TLF) {
+      //break;
+    //}
     ld bestScoreAtDepth = -INF;
     Move bestMoveAtDepth(moves.front());
-    bool quit = false;
+    ld beta = INF, alpha = -INF;
+    //bool quit = false;
     for (auto move : moves) {
-      ld score = minimax(board, move, turn, 1, alpha, beta);
+      OthelloBoard temp = board;
+      ld score = minimax(temp, move, turn, 1, alpha, beta);
       if (score > bestScoreAtDepth) {
         bestScoreAtDepth = score;
         bestMoveAtDepth = move;
       }
-      if (((ld)(clock() - start) / CLOCKS_PER_SEC) >= TLF) {
-        quit = true;
-        break;
-      }
+      //if (((ld)(clock() - start) / CLOCKS_PER_SEC) >= TLF) {
+        //quit = true;
+        //break;
+      //}
+      temp = board;
     }
-    if (bestScoreAtDepth > bestScore) {
-      bestScore = bestScoreAtDepth;
-      bestMove = bestMoveAtDepth;
-    }
-    if (quit)
-      break;
-  }
-  return bestMove;
+    //if (bestScoreAtDepth > bestScore) {
+      //bestScore = bestScoreAtDepth;
+      //bestMove = bestMoveAtDepth;
+    //}
+    //if (quit)
+      //break;
+  //}
+  return bestMoveAtDepth;
 }
 
 // The following lines are _very_ important to create a bot module for Desdemona
