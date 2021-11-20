@@ -261,7 +261,7 @@ ld MyBot::minimax(OthelloBoard board, Move move, Turn turn, short depth,
     else
       return -INF;
   }
-  ld result = -INF;
+  ld result = (depth & 1) ? INF : -INF;
   for (Move move : moves) {
     ld res = minimax(board, move, turn, depth + 1, alpha, beta);
     if (depth & 1) {
@@ -317,6 +317,7 @@ Move MyBot::play(const OthelloBoard &board) {
     //if (quit)
       //break;
   //}
+  //return bestMove;
   return bestMoveAtDepth;
 }
 
