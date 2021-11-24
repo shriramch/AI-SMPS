@@ -54,10 +54,10 @@ private:
   int moveNo;
   vector<int> X1;
   vector<int> Y1;
-  vector<vector<int>> cellValue;
+  vector<vector<vector<ld>>> cellValue;
   clock_t start;
   short max_depth;
-  ld P, D, C, L, M, F;
+  ld P, D[3], C, L, M, F;
   short phase;
 };
 
@@ -69,20 +69,55 @@ MyBot::MyBot(Turn turn) : OthelloPlayer(turn) {
     moveNo = 1;
   X1 = {-1, -1, 0, 1, 1, 1, 0, -1};
   Y1 = {0, 1, 1, 1, 0, -1, -1, -1};
-  cellValue.push_back({20, -3, 11, 8});
-  cellValue.push_back({-3, -7, -4, 1});
-  cellValue.push_back({11, -4, 2, 2});
-  cellValue.push_back({8, 1, 2, -3});
-  for (int i = 0; i < 4; ++i) {
-    for (int j = 0; j < 4; ++j) {
-      cellValue[i].push_back(cellValue[i][3 - j]);
-    }
-  }
-  for (int i = 0; i < 4; ++i) {
-    cellValue.push_back(cellValue[3 - i]);
-  }
-  P = 11, D = 10;
-  C = 850.724, L = 382.026, M = 86.922, F = 78.396;
+
+  cellValue = {
+      {{0, 0, 0, 0, 0, 0, 0, 0},
+       {0, -0.02231, 0.05583, 0.02004, 0.02004, 0.5583, -0.02231, 0},
+       {0, 0.05583, 0.10126, -0.10927, -0.10927, 0.10126, 0.05583, 0},
+       {0, 0.02004, -0.10927, -0.10155, -0.10155, -0.10927, 0.02004, 0},
+       {0, 0.02004, -0.10927, -0.10155, -0.10155, -0.10927, 0.02004, 0},
+       {0, 0.05583, 0.10126, -0.10927, -0.10927, 0.10126, 0.05583, 0},
+       {0, -0.02231, 0.05583, 0.02004, 0.02004, 0.5583, -0.02231, 0},
+       {0, 0, 0, 0, 0, 0, 0, 0}},
+      {
+          {6.32711, -3.32813, 0.33907, -2.00512, -2.00512, 0.33907, -3.32813,
+           6.32711},
+          {-3.32813, -1.52928, -1.87550, -0.18176, -0.18176, -1.87550, -1.52928,
+           -3.32813},
+          {0.33907, -1.87550, 1.06939, 0.62415, 0.62415, 1.06939, -1.87550,
+           0.33907},
+          {-2.00512, -0.18176, 0.62415, 0.10539, 0.10539, 0.62415, -0.18176,
+           -2.00512},
+          {-2.00512, -0.18176, 0.62415, 0.10539, 0.10539, 0.62415, -0.18176,
+           -2.00512},
+          {0.33907, -1.87550, 1.06939, 0.62415, 0.62415, 1.06939, -1.87550,
+           0.33907},
+          {-3.32813, -1.52928, -1.87550, -0.18176, -0.18176, -1.87550, -1.52928,
+           -3.32813},
+          {6.32711, -3.32813, 0.33907, -2.00512, -2.00512, 0.33907, -3.32813,
+           6.32711},
+      },
+      {
+          {5.50062, -0.17812, -2.58948, -0.59007, -0.59007, -2.58948, -0.17812,
+           5.50062},
+          {-0.17812, 0.96804, -2.16084, -2.01723, -2.01723, -2.16084, 0.96804,
+           -0.17812},
+          {-2.58948, -2.16084, 0.94062, -1.07055, -1.07055, 0.94062, -2.16084,
+           -2.58948},
+          {-0.59007, -2.01723, -1.07055, 0.73486, 0.73486, -1.07055, -2.01723,
+           -0.59007},
+          {-0.59007, -2.01723, -1.07055, 0.73486, 0.73486, -1.07055, -2.01723,
+           -0.59007},
+          {-2.58948, -2.16084, 0.94062, -1.07055, -1.07055, 0.94062, -2.16084,
+           -2.58948},
+          {-0.17812, 0.96804, -2.16084, -2.01723, -2.01723, -2.16084, 0.96804,
+           -0.17812},
+          {5.50062, -0.17812, -2.58948, -0.59007, -0.59007, -2.58948, -0.17812,
+           5.50062},
+      }};
+  cin >> P >> D[0] >> D[1] >> D[2] >> C >> L >> M >> F;
+  // P = 11, D = 10;
+  // C = 850.724, L = 382.026, M = 86.922, F = 78.396;
 }
 
 int MyBot::numValidMoves(OthelloBoard &board, Turn turn) {
@@ -90,25 +125,24 @@ int MyBot::numValidMoves(OthelloBoard &board, Turn turn) {
 }
 
 ld MyBot::evaluate(OthelloBoard &board, Turn turn) {
-  int myTiles = 0, oppTiles = 0, i, j, k, myFrontTiles = 0, oppFrontTiles = 0,
-      x, y;
-  ld p = 0.0, c = 0.0, l = 0.0, m = 0.0, f = 0.0, d = 0.0;
-
   Turn opp_turn = other(turn);
 
-  for (i = 0; i < 8; i++)
-    for (j = 0; j < 8; j++) {
+  int myTiles = 0, oppTiles = 0, myFrontTiles = 0, oppFrontTiles = 0;
+
+  ld d = 0.0;
+  for (int i = 0; i < 8; i++)
+    for (int j = 0; j < 8; j++) {
       if (board.get(i, j) == opp_turn) {
-        d += cellValue[i][j];
+        d += cellValue[phase][i][j];
         ++myTiles;
       } else if (board.get(i, j) == turn) {
-        d -= cellValue[i][j];
+        d -= cellValue[phase][i][j];
         ++oppTiles;
       }
       if ((board.get(i, j) == turn) || (board.get(i, j) == opp_turn)) {
-        for (k = 0; k < 8; k++) {
-          x = i + X1[k];
-          y = j + Y1[k];
+        for (int k = 0; k < 8; k++) {
+          int x = i + X1[k];
+          int y = j + Y1[k];
           if (x >= 0 && x < 8 && y >= 0 && y < 8 &&
               !((board.get(x, y) == turn) || (board.get(x, y) == opp_turn))) {
             if (board.get(i, j) == opp_turn)
@@ -121,18 +155,25 @@ ld MyBot::evaluate(OthelloBoard &board, Turn turn) {
       }
     }
 
+  ld p = 0.0;
+
   if (myTiles > oppTiles)
     p = (100.0 * myTiles) / (myTiles + oppTiles);
   else if (myTiles < oppTiles)
     p = -(100.0 * oppTiles) / (myTiles + oppTiles);
+
+  if (moveNo > 54) {
+    return p;
+  }
+
+  ld f = 0.0;
 
   if (myFrontTiles > oppFrontTiles)
     f = -(100.0 * myFrontTiles) / (myFrontTiles + oppFrontTiles);
   else if (myFrontTiles < oppFrontTiles)
     f = (100.0 * oppFrontTiles) / (myFrontTiles + oppFrontTiles);
 
-  // Corner occupancy
-  myTiles = oppTiles = 0;
+  myTiles = 0, oppTiles = 0;
   if (board.get(0, 0) == opp_turn)
     ++myTiles;
   else if (board.get(0, 0) == turn)
@@ -149,9 +190,8 @@ ld MyBot::evaluate(OthelloBoard &board, Turn turn) {
     ++myTiles;
   else if (board.get(7, 7) == turn)
     ++oppTiles;
-  c = 25 * (myTiles - oppTiles);
+  ld c = 25 * (myTiles - oppTiles);
 
-  // Corner closeness
   myTiles = oppTiles = 0;
   /*for (int i = 0; i < 0; ++i) {
     int X = 7 * (i & 1);
@@ -229,18 +269,17 @@ ld MyBot::evaluate(OthelloBoard &board, Turn turn) {
     else if (board.get(7, 6) == other(turn))
       oppTiles++;
   }
-  l = 10 * (myTiles - oppTiles);
+  ld l = 10 * (myTiles - oppTiles);
 
-  // Mobility
   myTiles = numValidMoves(board, opp_turn);
   oppTiles = numValidMoves(board, turn);
+  ld m = 0.0;
   if (myTiles > oppTiles)
     m = (100.0 * myTiles) / (myTiles + oppTiles);
   else if (myTiles < oppTiles)
     m = -(100.0 * oppTiles) / (myTiles + oppTiles);
 
-  // final weighted score
-  ld score = (P * p) + (C * c) + (L * l) + (M * m) + (F * f) + (D * d);
+  ld score = (P * p) + (C * c) + (L * l) + (M * m) + (F * f) + (D[phase] * d);
   return score;
 }
 
@@ -286,7 +325,6 @@ ld MyBot::minimax(OthelloBoard board, Move move, Turn turn, short depth,
 Move MyBot::play(const OthelloBoard &board) {
   start = clock();
   list<Move> moves = board.getValidMoves(turn);
-  Move bestMove(moves.front());
   max_depth = 2;
   moves.sort([&](Move a, Move b) {
     OthelloBoard b1 = board, b2 = board;
@@ -294,40 +332,57 @@ Move MyBot::play(const OthelloBoard &board) {
     b2.makeMove(turn, b);
     return evalMove(b1, turn) > evalMove(b2, turn);
   });
-  // int depth_limit = (moveNo < 50) ? 6 : 20;
-  int depth_limit = 200;
-  for (; max_depth < depth_limit; ++max_depth) {
+  max_depth = (moveNo < 54) ? 6 : 20;
+  if (phase == 0) {
+    int res = board.get(0, 0) != EMPTY
+                  ? 1
+                  : 0 + board.get(0, 7) != EMPTY
+                        ? 1
+                        : 0 + board.get(7, 0) != EMPTY
+                              ? 1
+                              : 0 + board.get(7, 7) != EMPTY ? 1 : 0;
+    if (res > 0) {
+      phase = 1;
+    }
+  } else if (phase == 1) {
+    int res = board.get(0, 0) == BLACK
+                  ? 1
+                  : 0 + board.get(0, 7) == BLACK
+                        ? 1
+                        : 0 + board.get(7, 0) == BLACK
+                              ? 1
+                              : 0 + board.get(7, 7) == BLACK ? 1 : 0;
+    if (res > 1) {
+      phase = 2;
+    }
+    res = board.get(0, 0) == RED
+              ? 1
+              : 0 + board.get(0, 7) == RED
+                    ? 1
+                    : 0 + board.get(7, 0) == RED
+                          ? 1
+                          : 0 + board.get(7, 7) == RED ? 1 : 0;
+    if (res > 1) {
+      phase = 2;
+    }
+  }
+  ld bestScoreAtDepth = -INF;
+  Move bestMoveAtDepth(moves.front());
+  ld beta = INF, alpha = -INF;
+  for (auto move : moves) {
+    OthelloBoard temp = board;
+    ld score = minimax(temp, move, turn, 1, alpha, beta);
+    if (score > bestScoreAtDepth) {
+      bestScoreAtDepth = score;
+      bestMoveAtDepth = move;
+    }
     if (((ld)(clock() - start) / CLOCKS_PER_SEC) >= TLF) {
       break;
     }
-    ld bestScoreAtDepth = -INF;
-    Move bestMoveAtDepth(moves.front());
-    ld beta = INF, alpha = -INF;
-    bool quit = false;
-    for (auto move : moves) {
-      OthelloBoard temp = board;
-      ld score = minimax(temp, move, turn, 1, alpha, beta);
-      if (score > bestScoreAtDepth) {
-        bestScoreAtDepth = score;
-        bestMoveAtDepth = move;
-      }
-      if (((ld)(clock() - start) / CLOCKS_PER_SEC) >= TLF) {
-        quit = true;
-        break;
-      }
-      temp = board;
-    }
-    bestMove = bestMoveAtDepth;
-    if (quit)
-      break;
-    // cout << "Depth = " << max_depth << " Score = " << bestScoreAtDepth <<
-    // endl;
+    temp = board;
   }
-  // cout << endl;
-  // cout << "Move = " << moveNo << " Depth = " << max_depth << endl;
   moveNo += 2;
-  return bestMove;
-  // return bestMoveAtDepth;
+  return bestMoveAtDepth;
 }
 
 // The following lines are _very_ important to create a bot module for Desdemona
