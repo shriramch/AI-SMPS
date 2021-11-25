@@ -27,29 +27,29 @@ do
     output=$(./bin/Desdemona ./bots/MyBot/botNice.so ./bots/Bots/0.so < inp.txt | tail -1)
     v=$output
     output=$(./bin/Desdemona ./bots/MyBot/botNice.so ./bots/Bots/2.so < inp.txt | tail -1)
-    v=$(($v-$output))
+    v=$(($v+$output))
     output=$(./bin/Desdemona ./bots/MyBot/botNice.so ./bots/Bots/4.so < inp.txt | tail -1)
-    v=$(($v-$output))
+    v=$(($v+$output))
     output=$(./bin/Desdemona ./bots/MyBot/botNice.so ./bots/Bots/6.so < inp.txt | tail -1)
-    v=$(($v-$output))
+    v=$(($v+$output))
     output=$(./bin/Desdemona ./bots/MyBot/botNice.so ./bots/Bots/8.so < inp.txt | tail -1)
-    v=$(($v-$output))
+    v=$(($v+$output))
     output=$(./bin/Desdemona ./bots/MyBot/botNice.so ./bots/Bots/bapat.so < inp.txt | tail -1)
-    v=$(($v-$output))
+    v=$(($v+$output))
     output=$(./bin/Desdemona ./bots/Bots/1.so ./bots/MyBot/botNice.so < inp.txt| tail -1)
-    v=$(($v+$output))
+    v=$(($v-$output))
     output=$(./bin/Desdemona ./bots/Bots/3.so ./bots/MyBot/botNice.so < inp.txt| tail -1)
-    v=$(($v+$output))
+    v=$(($v-$output))
     output=$(./bin/Desdemona ./bots/Bots/5.so ./bots/MyBot/botNice.so < inp.txt| tail -1)
-    v=$(($v+$output))
+    v=$(($v-$output))
     output=$(./bin/Desdemona ./bots/Bots/7.so ./bots/MyBot/botNice.so < inp.txt| tail -1)
-    v=$(($v+$output))
+    v=$(($v-$output))
     output=$(./bin/Desdemona ./bots/Bots/9.so ./bots/MyBot/botNice.so < inp.txt| tail -1)
-    v=$(($v+$output))
+    v=$(($v-$output))
     output=$(./bin/Desdemona ./bots/Bots/fake.so ./bots/MyBot/botNice.so < inp.txt| tail -1)
-    v=$(($v+$output))
+    v=$(($v-$output))
     echo $v >> log.txt
-    if [ $v -gt $maxv ]
+    if [ $v -lt $maxv ]
     then
         maxv=$v
         bestP=$P
